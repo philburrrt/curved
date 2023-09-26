@@ -237,6 +237,7 @@ contract Curved is Ownable, ERC20 {
 
     function getReward() external updateReward(msg.sender) {
         uint reward = rewards[msg.sender];
+        require(reward + totalSupply() <= maxSupply, "Max supply reached");
         if (reward > 0) {
             rewards[msg.sender] = 0;
             _mint(msg.sender, reward);
