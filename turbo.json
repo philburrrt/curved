@@ -25,7 +25,9 @@
         "DATABASE_URL",
         "ALCHEMY_WS",
         "LOCAL_WS",
-        "LOCAL_CURVED_ADDRESS"
+        "LOCAL_CURVED_ADDRESS",
+        "GOERLI_CURVED_ADDRESS",
+        "GOERLI_WS"
       ]
     },
     "start": {

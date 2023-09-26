@@ -66,6 +66,7 @@ export const pendingContent = mysqlTable(
 
 export const trades = mysqlTable("trades", {
   amount: bigint("amount", { mode: "number" }).notNull(),
+  hash: varchar("hash", { length: 66 }).notNull(),
   id: serial("id").primaryKey(),
   owner: varchar("owner", { length: ETH_ADDRESS_LENGTH }).notNull(),
   price: bigint("price", { mode: "number" }).notNull(),
@@ -73,7 +74,6 @@ export const trades = mysqlTable("trades", {
   side: bigint("side", { mode: "number" }).notNull(),
   supply: bigint("supply", { mode: "number" }).notNull(),
   trader: varchar("trader", { length: ETH_ADDRESS_LENGTH }).notNull(),
-  hash: varchar("hash", { length: 66 }).notNull(),
 });
 
 export const ethereumSession = mysqlTable(

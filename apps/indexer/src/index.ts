@@ -1,9 +1,9 @@
 import { config } from "dotenv";
+import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
 
 import CurveABI from "./abi/Curved.json" assert { type: "json" };
 import { db } from "./db";
-import { eq } from "drizzle-orm";
 import { content, pendingContent, trades } from "./schema";
 
 config();
@@ -50,10 +50,10 @@ curve.on("*", async (event) => {
         );
 
         await db.insert(content).values({
+          description: pending.description,
           owner: owner as string,
           shareId,
           url: pending.url,
-          description: pending.description,
         });
 
         // TODO: Delete pending content
@@ -62,14 +62,14 @@ curve.on("*", async (event) => {
         await db.delete(pendingContent).where(eq(pendingContent.owner, owner));
 
         const tradeEntry = {
+          amount: 1,
+          hash: event.transactionHash,
+          owner: owner.toLowerCase(),
+          price: 0,
           shareId: shareId,
           side: 0,
-          trader: owner.toLowerCase(),
-          owner: owner.toLowerCase(),
-          amount: 1,
-          price: 0,
           supply: 1,
-          hash: event.transactionHash,
+          trader: owner.toLowerCase(),
         };
 
         console.log("Inserting trade", tradeEntry);
@@ -83,14 +83,14 @@ curve.on("*", async (event) => {
     }
     case "Trade": {
       const entry = {
+        amount: event.args[4].toNumber(),
+        hash: event.transactionHash,
+        owner: event.args[3].toLowerCase(),
+        price: event.args[5].toString(),
         shareId: event.args[0].toNumber(),
         side: event.args[1].toNumber(),
-        trader: event.args[2].toLowerCase(),
-        owner: event.args[3].toLowerCase(),
-        amount: event.args[4].toNumber(),
-        price: event.args[5].toString(),
         supply: event.args[6].toNumber(),
-        hash: event.transactionHash,
+        trader: event.args[2].toLowerCase(),
       };
 
       console.log("Inserting trade", entry);
