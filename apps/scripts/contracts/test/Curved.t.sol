@@ -120,12 +120,6 @@ contract CurvedTest is Test {
         assertEq(userBalanceAfter, 0);
     }
 
-    // function testGetUserOwnedShares() public createShare(1) {
-    //     uint256[] memory ownedShares = _curved.getUserOwnedShares(_users[0]);
-    //     assertEq(ownedShares.length, 1);
-    //     assertEq(ownedShares[0], _curved.currentId() - 1);
-    // }
-
     function testGetRete() public {
       uint256 start = _curved.startTime();
       uint256 year1 = _curved.getRate(start + 1);
@@ -166,8 +160,7 @@ contract CurvedTest is Test {
         uint256 currentRate = _curved.getRate(userClaimTimestamp);
         uint256 expectedReward = earnedDuration * currentRate;
         uint256 userRewardBalance = _rewardToken.balanceOf(_users[1]);
-        console2.log("expected reward: ", expectedReward);
-        console2.log("user reward balance: ", userRewardBalance);
+        assertEq(userRewardBalance, expectedReward);
     }
 
     function testAccurateRewardAsManyInDiffPools() public createShare(2) {
@@ -200,11 +193,7 @@ contract CurvedTest is Test {
             uint256 expectedReward = (earnedDuration * currentRate * userDeposit) /
                 totalDeposit;
             uint256 userRewardBalance = _rewardToken.balanceOf(_users[i]);
-            console2.log("============== USER REWARD STATE ==============");
-            console2.log("user: ", _users[i]);
-            console2.log("expected reward: ", expectedReward);
-            console2.log("user reward balance: ", userRewardBalance);
-            console2.log("============== END USER REWARD STATE ==============");
+            assertEq(userRewardBalance, expectedReward);
         }
         
     }
@@ -224,54 +213,9 @@ contract CurvedTest is Test {
             uint256 expectedReward = (earnedDuration * currentRate * userDeposit) /
                 totalDeposit;
             uint256 userRewardBalance = _rewardToken.balanceOf(_users[i]);
-            console2.log("============== USER REWARD STATE ==============");
-            console2.log("user: ", _users[i]);
-            console2.log("expected reward: ", expectedReward);
-            console2.log("user reward balance: ", userRewardBalance);
-            console2.log("============== END USER REWARD STATE ==============");
+            assertEq(userRewardBalance, expectedReward);
         }
     }
 
-    function testClaimYearOne() public createShare(1) purchaseShare(1) {
-        uint256 targetTime = _curved.startTime() + 31449598;
-        vm.warp(targetTime);
-        _curved.getReward();
-        uint256 userRewardBalance = _rewardToken.balanceOf(_users[1]);
-        console2.log("user reward balance: ", userRewardBalance);
-    }
-
-    function testClaimYearTwo() public createShare(1) purchaseShare(1) {
-        uint256 targetTime = _userPurchaseTimestamp[_users[1]] + 2 * 51 weeks;
-        vm.warp(targetTime);
-        _curved.getReward();
-        uint256 userRewardBalance = _rewardToken.balanceOf(_users[1]);
-        console2.log("user reward balance: ", userRewardBalance);
-    }
-
-
-    // ====== HELPERS ======
-
-    function logRewardState() public view {
-        console2.log("============== REWARD STATE ==============");
-        console2.log("open interest: ", _curved.openInterest());
-        console2.log("updatedAt: ", _curved.updatedAt());
-        console2.log("rewardPerEthStored: ", _curved.rewardPerEthStored());
-        console2.log("============== END REWARD STATE ==============");
-    }
-
-    function logUserRewardState(uint256 user) public view {
-        console2.log("============== USER REWARD STATE ==============");
-        console2.log("user: ", _users[user]);
-        console2.log(
-            "userEthContributed: ",
-            _curved.userEthContributed(_users[user])
-        );
-        console2.log(
-            "userRewardPerEthPaid: ",
-            _curved.userRewardPerEthPaid(_users[user])
-        );
-        console2.log("rewards: ", _curved.rewards(_users[user]));
-        console2.log("token balance: ", _rewardToken.balanceOf(_users[user]));
-        console2.log("============== END USER REWARD STATE ==============");
-    }
+    // TODO: test claim each individual year
 }

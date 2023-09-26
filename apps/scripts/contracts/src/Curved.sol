@@ -16,8 +16,6 @@ contract Curved is Ownable, ERC20 {
     IERC20 public immutable rewardsToken;
     // Reward start time
     uint256 public startTime;
-    // Duration of rewards to be paid out (in seconds)
-    uint256 public duration = 313 weeks;
     // Timestamp of when the rewards finish
     uint256 public finishAt;
     // Minimum of last updated time and reward finish time
@@ -78,7 +76,8 @@ contract Curved is Ownable, ERC20 {
         protocolFeeDestination = _protocolFeeDestination;
         protocolFeePercent = _protocolFeePercent;
         startTime = block.timestamp;
-        finishAt = startTime + duration;
+        updatedAt = startTime;
+        finishAt = startTime + 313 weeks;
         rewardsToken = IERC20(address(this));
         _mint(msg.sender, 2_000_000_000 ether);
     }
@@ -182,33 +181,35 @@ contract Curved is Ownable, ERC20 {
 
     // ====== Rewards ======
 
+    uint256[] public epoch = [
+        4_000_000_000 ether, // 50%
+        1_600_000_000 ether, // 20%
+        1_000_000_000 ether, // 12.5%
+        600_000_000 ether, // 7.5%
+        420_000_000 ether, // 5.25%
+        380_000_000 ether // 4.75%
+    ];
+
+    // reward per second
     function getRate(uint256 currentTime) public view returns (uint256) {
         uint256 timeElapsed = currentTime - startTime;
-        uint256 yearsElapsed = timeElapsed / 52 weeks;
-        uint256 rewardPool;
-
-        if (yearsElapsed == 0) {
-            rewardPool = 4_000_000_000 ether; // 50% of 8 billion
-        } else if (yearsElapsed == 1) {
-            rewardPool = 1_600_000_000 ether; // 20% of 8 billion
-        } else if (yearsElapsed == 2) {
-            rewardPool = 1_000_000_000 ether; // 12.5% of 8 billion
-        } else if (yearsElapsed == 3) {
-            rewardPool = 600_000_000 ether; // 7.5% of 8 billion
-        } else if (yearsElapsed == 4) {
-            rewardPool = 420_000_000 ether; // 5.25% of 8 billion
-        } else if (yearsElapsed == 5) {
-            rewardPool = 380_000_000 ether; // 4.75% of 8 billion
+        uint256 rate;
+        if (timeElapsed < 52 weeks) {
+            rate = (epoch[0]) / (52 weeks);
+        } else if (timeElapsed < 104 weeks) {
+            rate = (epoch[1]) / (52 weeks);
+        } else if (timeElapsed < 156 weeks) {
+            rate = (epoch[2]) / (52 weeks);
+        } else if (timeElapsed < 208 weeks) {
+            rate = (epoch[3]) / (52 weeks);
+        } else if (timeElapsed < 260 weeks) {
+            rate = (epoch[4]) / (52 weeks);
+        } else if (timeElapsed < 312 weeks) {
+            rate = (epoch[5]) / (52 weeks);
         } else {
-            rewardPool = 0; // No more tokens to distribute
+            rate = 0;
         }
-
-        return rewardPool / 52 weeks;
-    }
-
-
-    function tokensRemaining() public view returns (uint256) {
-        return maxSupply - totalSupply();
+        return rate;
     }
 
     function lastTimeRewardApplicable() public view returns (uint) {
@@ -216,7 +217,7 @@ contract Curved is Ownable, ERC20 {
     }
 
     function rewardPerToken() public view returns (uint) {
-        if (address(this).balance == 0) {
+        if (openInterest == 0) {
             return rewardPerEthStored;
         }
 
@@ -225,7 +226,7 @@ contract Curved is Ownable, ERC20 {
             (getRate(block.timestamp) *
                 (lastTimeRewardApplicable() - updatedAt) *
                 1e18) /
-            address(this).balance;
+            openInterest;
     }
 
     function earned(address _account) public view returns (uint) {
