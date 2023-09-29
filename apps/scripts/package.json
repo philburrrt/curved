@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "_deploy": "cd contracts && forge create --rpc-url $RPC_URL --constructor-args $LOCAL_DEPLOYER_ADDRESS \"50000000000000000\" --private-key $LOCAL_PRIVATE_KEY src/Curved.sol:Curved",
+    "_deploy": "cd contracts && forge create --rpc-url $RPC_URL --private-key $LOCAL_PRIVATE_KEY src/Curved.sol:Curved",
     "anvil": "cd contracts && anvil --block-time 1 --chain-id 9999",
     "build": "cd contracts && forge build",
     "db": "node db/index.js",

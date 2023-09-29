@@ -59,7 +59,7 @@ contract CurvedTest is Test {
         for (uint i = 0; i < _users.length; i++) {
             vm.deal(_users[i], 100 ether);
         }
-        _curved = new Curved(_owner, 0.01 ether);
+        _curved = new Curved();
         _curvedAddress = address(_curved);
         _rewardToken = IERC20(_curvedAddress);
         uint256 _ownerRewardTokenBalance = _rewardToken.balanceOf(_owner);
@@ -307,5 +307,17 @@ contract CurvedTest is Test {
       assertLe(earnedAfterBuyingMore, earnedBeforeOGSale);
       // result: it totally resets if they don't claim
       // were potentially screwing people by not forcing them to claim while taking profit
+    }
+
+    function testRoyaltyFees() public createShare(1) {
+      // royalty fees should be 5% of getPrice() and send to the share owner
+      uint256 royaltyFee = _curved.royaltyFeePercent();
+      uint256 realCost = _curved.getBuyPrice(0, 1);
+      uint256 expectedRoyaltyFee = realCost * royaltyFee / 1 ether;
+      uint256 ownerBalanceBefore = _owners[0].balance;
+      vm.prank(_users[1]);
+      _curved.buyShare{value: _curved.getBuyPriceAfterFee(0, 1)}(0, 1);
+      uint256 ownerBalanceAfter = _owners[0].balance;
+      assertEq(ownerBalanceAfter - ownerBalanceBefore, expectedRoyaltyFee);
     }
 }

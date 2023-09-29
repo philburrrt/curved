@@ -7,7 +7,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract Curved is Ownable, ERC20 {
     // ====== Market Variables ======
     address public protocolFeeDestination;
-    uint256 public protocolFeePercent; // 0.05 eth = 5%
+    // 0.05 ether = 5%
+    uint256 public royaltyFeePercent;
+    uint256 public protocolFeePercent;
     uint256 public currentId = 0;
 
     // ====== Reward Variables ======
@@ -69,12 +71,10 @@ contract Curved is Ownable, ERC20 {
 
     mapping(uint256 => Share) public shareInfo;
 
-    constructor(
-        address _protocolFeeDestination,
-        uint256 _protocolFeePercent
-    ) ERC20("Curved", "CURVED") {
-        protocolFeeDestination = _protocolFeeDestination;
-        protocolFeePercent = _protocolFeePercent;
+    constructor() ERC20("Curved", "CURVED") {
+        protocolFeeDestination = msg.sender;
+        protocolFeePercent = 0.05 ether;
+        royaltyFeePercent = 0.05 ether;
         startTime = block.timestamp;
         updatedAt = startTime;
         finishAt = startTime + 313 weeks;
@@ -92,6 +92,12 @@ contract Curved is Ownable, ERC20 {
         uint256 _protocolFeePercent
     ) external onlyOwner {
         protocolFeePercent = _protocolFeePercent;
+    }
+
+        function setRoyaltyFeePercent(
+        uint256 _royaltyFeePercent
+    ) external onlyOwner {
+        royaltyFeePercent = _royaltyFeePercent;
     }
 
     function getPrice(
@@ -131,12 +137,14 @@ contract Curved is Ownable, ERC20 {
         userNetEthContributed[msg.sender] = userNetEthContributed[msg.sender] + int(price);
         openInterest = openInterest + price;
         uint256 protocolFee = (price * protocolFeePercent) / 1 ether;
-        require(msg.value >= price + protocolFee, "Insufficient payment");
+        uint256 royaltyFee = (price * royaltyFeePercent) / 1 ether;
+        require(msg.value >= price + protocolFee + royaltyFee, "Insufficient payment");
         share.balances[msg.sender] = share.balances[msg.sender] + amount;
         share.totalSupply = supply + amount;
         emit Trade(id, 0, msg.sender, share.owner, amount, price, supply);
         (bool success1, ) = protocolFeeDestination.call{value: protocolFee}("");
-        require(success1, "Unable to send funds");
+        (bool success2, ) = share.owner.call{value: royaltyFee}("");
+        require(success1 && success2, "Unable to send funds");
     }
 
     function sellShare(uint256 id, uint256 amount) external updateReward(msg.sender) {
@@ -155,11 +163,15 @@ contract Curved is Ownable, ERC20 {
         userNetEthContributed[msg.sender] = userNetEthContributed[msg.sender] - int(owed);
         openInterest = openInterest - owed;
         uint256 protocolFee = (owed * protocolFeePercent) / 1 ether;
+        uint256 royaltyFee = (owed * royaltyFeePercent) / 1 ether;
+        require(address(this).balance >= owed - protocolFee - royaltyFee, "Insufficient funds");
         share.balances[msg.sender] = share.balances[msg.sender] - amount;
         share.totalSupply = supply - amount;
         emit Trade(id, 1, msg.sender, share.owner, amount, owed, supply);
-        (bool success1, ) = msg.sender.call{value: owed - protocolFee}("");
-        require(success1, "Unable to send funds");
+        (bool success1, ) = msg.sender.call{value: owed - protocolFee - royaltyFee}("");
+        (bool success2, ) = protocolFeeDestination.call{value: protocolFee}("");
+        (bool success3, ) = share.owner.call{value: royaltyFee}("");
+        require(success1 && success2 && success3, "Unable to send funds");
     }
 
     function uri(uint256 id) external view returns (string memory) {
@@ -284,7 +296,8 @@ contract Curved is Ownable, ERC20 {
         require(id < currentId, "Invalid share id");
         uint256 price = getBuyPrice(id, amount);
         uint256 protocolFee = (price * protocolFeePercent) / 1 ether;
-        return price + protocolFee;
+        uint256 royaltyFee = (price * royaltyFeePercent) / 1 ether;
+        return price + protocolFee + royaltyFee;
     }
 
     function getSellPriceAfterFee(
@@ -294,7 +307,8 @@ contract Curved is Ownable, ERC20 {
         require(id < currentId, "Invalid share id");
         uint256 price = getSellPrice(id, amount);
         uint256 protocolFee = (price * protocolFeePercent) / 1 ether;
-        return price - protocolFee;
+        uint256 royaltyFee = (price * royaltyFeePercent) / 1 ether;
+        return price - protocolFee - royaltyFee;
     }
 
     function getShareBalance(
