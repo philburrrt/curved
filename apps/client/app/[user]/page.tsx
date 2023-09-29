@@ -5,6 +5,8 @@ import Avatar from "@/components/Avatar";
 import { PostCard } from "@/components/PostCard";
 import { db } from "@/lib/db";
 import { fetchProfileFromUsername } from "@/lib/fetchProfile";
+import { FollowButton } from "./FollowButton";
+import { getSession } from "@/lib/auth/getSession";
 
 export const revalidate = 10;
 
@@ -49,6 +51,17 @@ export default async function User({ params }: Props) {
   const profile = await fetchProfileFromUsername(username);
   if (!profile) notFound();
 
+  const session = await getSession();
+  const userAddress = profile.address;
+  let isFollowing = false;
+  if (session && session.address !== userAddress) {
+    const following = await db.query.userFollowing.findMany({
+      where: (row, { and, eq }) =>
+        and(eq(row.address, session.address), eq(row.following, userAddress)),
+    });
+    isFollowing = following.length > 0;
+  }
+
   const posts = await db.query.content.findMany({
     columns: {
       description: true,
@@ -66,6 +79,12 @@ export default async function User({ params }: Props) {
         <Avatar size={128} src={profile.avatar} uniqueKey={username} />
         <h1 className="text-xl font-bold">@{profile.username}</h1>
       </div>
+
+      <FollowButton
+        following={isFollowing}
+        clientAddress={session?.address}
+        userAddress={profile.address}
+      />
 
       {posts.map(({ description, ...post }) => (
         <PostCard
