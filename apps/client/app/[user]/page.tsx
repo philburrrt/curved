@@ -1,12 +1,14 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-
+import { getSession } from "@/lib/auth/getSession";
 import { PostCard } from "@/components/PostCard";
 import { db } from "@/lib/db";
 import { fetchProfileFromUsername } from "@/lib/fetchProfile";
 
 import { UserAvatar } from "./UserAvatar";
 import { Username } from "./Username";
+import { FollowButton } from "./FollowButton";
+import { is } from "drizzle-orm";
 
 export const revalidate = 10;
 
@@ -50,6 +52,21 @@ export default async function User({ params }: Props) {
 
   const profile = await fetchProfileFromUsername(username);
   if (!profile) notFound();
+  const userAddress = profile.address.toLowerCase();
+
+  let isFollowing = false;
+  const session = await getSession();
+  let clientAddress = "";
+  if (session) {
+    clientAddress = session.user.address.toLowerCase();
+    const following = await db.query.userFollowing.findFirst({
+      where: (row, { and, eq }) =>
+        and(
+          and(eq(row.address, clientAddress), eq(row.following, userAddress)),
+        ),
+    });
+    isFollowing = !!following;
+  }
 
   const posts = await db.query.content.findMany({
     columns: {
@@ -69,6 +86,14 @@ export default async function User({ params }: Props) {
         <UserAvatar username={profile.username} avatar={profile.avatar} />
         <Username username={profile.username} />
       </div>
+
+      {session && clientAddress !== userAddress && (
+        <FollowButton
+          isFollowing={isFollowing}
+          clientAddress={clientAddress}
+          userAddress={userAddress}
+        />
+      )}
 
       {posts.map(({ description, ...post }) => (
         <PostCard
