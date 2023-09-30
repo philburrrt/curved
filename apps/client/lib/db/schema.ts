@@ -66,9 +66,10 @@ export const repost = mysqlTable(
   {
     author: varchar("author", { length: ETH_ADDRESS_LENGTH }).notNull(),
     id: serial("id").primaryKey(),
-    quote: varchar("quote", { length: 140 }).notNull(),
+    quote: varchar("quote", { length: 140 }),
     referenceRepost: bigint("reference_repost", { mode: "number" }), // if it's a repost of a repost
     referenceShareId: bigint("share_id", { mode: "number" }).notNull(), // all should have a shareId
+    createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => ({
     shareIdIndex: uniqueIndex("shareId").on(table.referenceShareId),
