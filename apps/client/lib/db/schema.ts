@@ -26,12 +26,12 @@ import { NANOID_LENGTH } from "./nanoid";
 export const content = mysqlTable(
   "content",
   {
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
     description: varchar("description", { length: MAX_DESCRIPTION_LENGTH }),
     id: serial("id").primaryKey(),
     owner: varchar("owner", { length: ETH_ADDRESS_LENGTH }).notNull(),
     shareId: bigint("share_id", { mode: "number" }).notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
     url: varchar("url", { length: 255 }).notNull(),
   },
   (table) => ({
@@ -64,21 +64,14 @@ export const user = mysqlTable(
 export const repost = mysqlTable(
   "repost",
   {
-    // references content.shareId
-    address: varchar("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
-
+    author: varchar("author", { length: ETH_ADDRESS_LENGTH }).notNull(),
     id: serial("id").primaryKey(),
-
-    // address of the user who reposted
     quote: varchar("quote", { length: 140 }).notNull(),
-
-    // twitter length
-    referenceRepost: bigint("reference_repost", { mode: "number" }),
-    // uinque id for the repost
-    referenceShareId: bigint("share_id", { mode: "number" }).notNull(), // references repost.id. null if its the original post
+    referenceRepost: bigint("reference_repost", { mode: "number" }), // if it's a repost of a repost
+    referenceShareId: bigint("share_id", { mode: "number" }).notNull(), // all should have a shareId
   },
   (table) => ({
-    addressIndex: index("address").on(table.address),
+    shareIdIndex: uniqueIndex("shareId").on(table.referenceShareId),
   }),
 );
 

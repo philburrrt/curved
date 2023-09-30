@@ -10,6 +10,8 @@ import { inArray, desc } from "drizzle-orm";
 import { FEED_PAGE_SIZE } from "./constants";
 import { content } from "@/lib/db/schema";
 
+// TODO: add reposts
+
 const FetchLatestSchema = z.object({
   page: z.number().int().min(0),
   start: z.number().int().min(0).optional(),
