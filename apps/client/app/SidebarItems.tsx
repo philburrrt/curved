@@ -15,7 +15,8 @@ export function SidebarItems() {
 
   return (
     <ul className="flex space-x-1 md:block md:space-x-0 md:space-y-1">
-      <SidebarLink href="/" title="Home" icon="🏠" />
+      <SidebarLink href="/global" title="Home" icon="🏠" />
+      <SidebarLink href="/following" title="Following" icon="👥" />
 
       {status === "authenticated" && user ? (
         <>
