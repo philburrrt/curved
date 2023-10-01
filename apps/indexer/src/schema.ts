@@ -26,12 +26,12 @@ import { NANOID_LENGTH } from "./nanoid";
 export const content = mysqlTable(
   "content",
   {
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     description: varchar("description", { length: MAX_DESCRIPTION_LENGTH }),
     id: serial("id").primaryKey(),
     owner: varchar("owner", { length: ETH_ADDRESS_LENGTH }).notNull(),
     shareId: bigint("share_id", { mode: "number" }).notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     url: varchar("url", { length: 255 }).notNull(),
   },
   (table) => ({
@@ -43,6 +43,64 @@ export const content = mysqlTable(
 export const contentRelations = relations(content, ({ one }) => ({
   owner: one(user, {
     fields: [content.owner],
+    references: [user.address],
+  }),
+}));
+
+export const user = mysqlTable(
+  AUTH_USER_TABLE_NAME,
+  {
+    address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    avatarId: varchar("avatarId", { length: NANOID_LENGTH }),
+    id: varchar("id", { length: USER_ID_LENGTH }).primaryKey(),
+    username: varchar("username", { length: MAX_USERNAME_LENGTH }).notNull(),
+  },
+  (table) => ({
+    addressIndex: uniqueIndex("address").on(table.address),
+    usernameIndex: uniqueIndex("username").on(table.username),
+  }),
+);
+
+export const repost = mysqlTable(
+  "repost",
+  {
+    author: varchar("author", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    id: serial("id").primaryKey(),
+    quote: varchar("quote", { length: 140 }),
+    referenceRepost: bigint("reference_repost", { mode: "number" }), // if it's a repost of a repost
+    referenceShareId: bigint("share_id", { mode: "number" }).notNull(), // all should have a shareId
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    shareIdIndex: uniqueIndex("shareId").on(table.referenceShareId),
+  }),
+);
+
+export const userRelations = relations(user, ({ many }) => ({
+  posts: many(content),
+  reposts: many(repost),
+}));
+
+export const userFollowing = mysqlTable(
+  "user_following",
+  {
+    address: varchar("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    following: varchar("following", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    id: serial("id").primaryKey(),
+  },
+  (table) => ({
+    addressIndex: index("address").on(table.address),
+    followingIndex: index("following").on(table.following),
+  }),
+);
+
+export const userFollowingRelations = relations(userFollowing, ({ one }) => ({
+  followedUser: one(user, {
+    fields: [userFollowing.following],
+    references: [user.address],
+  }),
+  followingUser: one(user, {
+    fields: [userFollowing.address],
     references: [user.address],
   }),
 }));
@@ -102,21 +160,3 @@ export const session = mysqlTable(AUTH_SESSION_TABLE_NAME, {
   idleExpires: bigint("idle_expires", { mode: "number" }).notNull(),
   userId: varchar("user_id", { length: MAX_USERNAME_LENGTH }).notNull(),
 });
-
-export const user = mysqlTable(
-  AUTH_USER_TABLE_NAME,
-  {
-    address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
-    avatarId: char("avatarId", { length: NANOID_LENGTH }),
-    id: varchar("id", { length: USER_ID_LENGTH }).primaryKey(),
-    username: varchar("username", { length: MAX_USERNAME_LENGTH }).notNull(),
-  },
-  (table) => ({
-    addressIndex: uniqueIndex("address").on(table.address),
-    usernameIndex: uniqueIndex("username").on(table.username),
-  }),
-);
-
-export const userRelations = relations(user, ({ many }) => ({
-  posts: many(content),
-}));
