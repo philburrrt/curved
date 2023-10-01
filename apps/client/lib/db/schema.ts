@@ -68,7 +68,6 @@ export const userBalances = mysqlTable(
     address: varchar("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
     shareId: bigint("share_id", { mode: "number" }).notNull(),
     balance: bigint("balance", { mode: "number" }).notNull(), // share balance
-    royaltiesEarned: bigint("royalties_earned", { mode: "number" }).notNull(),
   },
   (table) => ({
     addressIndex: uniqueIndex("address").on(table.address),
