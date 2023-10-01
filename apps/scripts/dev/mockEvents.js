@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 const { LOCAL_CURVED_ADDRESS, LOCAL_PRIVATE_KEY } = process.env;
+console.log("LOCAL_CURVED_ADDRESS: ", LOCAL_CURVED_ADDRESS);
+console.log("LOCAL_PRIVATE_KEY: ", LOCAL_PRIVATE_KEY);
 import { ethers } from "ethers";
 import { CURVED_ABI } from "../abi/CurvedAbi.js";
 import assert from "assert";

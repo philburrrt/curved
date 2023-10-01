@@ -1,4 +1,4 @@
-import { Worker, isMainThread, parentPort } from "worker_threads";
+import { Worker } from "worker_threads";
 import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
@@ -12,36 +12,61 @@ config();
 
 export class Indexer {
   private accountingWorker: Worker;
+  private shareWorker: Worker;
   private provider: ethers.providers.WebSocketProvider;
   private curve: ethers.Contract;
-  public queue: string[];
+
   constructor() {
-    this.accountingWorker = new Worker("./workers/user_acconting");
+    this.accountingWorker = new Worker(
+      new URL("./workers/user_accounting.js", import.meta.url),
+    );
+    this.shareWorker = new Worker(
+      new URL("./workers/share_accounting.js", import.meta.url),
+    );
     this.provider = new ethers.providers.WebSocketProvider(WS_URL ?? "");
     this.curve = new ethers.Contract(
       CONTRACT_ADDRESS ?? "",
       CurveABI.abi,
       this.provider,
     );
-    this.queue = [];
+    this.accountingWorker.on("message", (event) => {
+      console.log("Worker received", event);
+    });
   }
 
   public async start() {
     this.curve.on("*", async (event) => {
       console.log("Event", event.event);
 
+      const workerEvent = {
+        blockNumber: event.blockNumber,
+        blockHash: event.blockHash,
+        transactionIndex: event.transactionIndex,
+        removed: event.removed,
+        address: event.address,
+        data: event.data,
+        topics: event.topics,
+        transactionHash: event.transactionHash,
+        logIndex: event.logIndex,
+        event: event.event,
+        eventSignature: event.eventSignature,
+        args: event.args.map((arg: any) => {
+          return arg._isBigNumber ? arg.toString() : arg;
+        }),
+      };
+
       switch (event.event) {
         case "ShareCreated": {
-          this.handleShareCreated(event);
+          // this.handleShareCreated(event);  // enter initial trade in db
+          this.accountingWorker.postMessage(workerEvent);
           break;
         }
         case "Trade": {
-          this.handleTrade(event);
+          // this.handleTrade(event); // enter trade in db
+          this.shareWorker.postMessage(workerEvent);
           break;
         }
       }
-
-      this.queue.push(event.transactionHash);
     });
   }
 

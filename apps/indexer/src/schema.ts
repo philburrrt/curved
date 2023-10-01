@@ -61,6 +61,27 @@ export const user = mysqlTable(
   }),
 );
 
+export const userBalances = mysqlTable(
+  "user_balances",
+  {
+    id: serial("id").primaryKey(),
+    address: varchar("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    shareId: bigint("share_id", { mode: "number" }).notNull(),
+    balance: bigint("balance", { mode: "number" }).notNull(), // share balance
+    royaltiesEarned: bigint("royalties_earned", { mode: "number" }).notNull(),
+  },
+  (table) => ({
+    addressIndex: uniqueIndex("address").on(table.address),
+  }),
+);
+
+export const shareData = mysqlTable("share_data", {
+  id: serial("id").primaryKey(),
+  shareId: bigint("share_id", { mode: "number" }).notNull(),
+  volume: bigint("volume", { mode: "number" }).notNull(),
+  holders: bigint("holders", { mode: "number" }).notNull(),
+});
+
 export const repost = mysqlTable(
   "repost",
   {

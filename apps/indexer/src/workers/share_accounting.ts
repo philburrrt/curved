@@ -4,6 +4,6 @@ import { db } from "../DB";
 
 parentPort!.on("message", async (event: any) => {
   // Your logic here for each transaction hash
-  console.log("User worker received", event);
-  parentPort!.postMessage(`User worker received ${event.event}`);
+  console.log("Share worker received", event);
+  parentPort!.postMessage(`Share worker received ${event.event}`);
 });
