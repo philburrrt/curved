@@ -70,7 +70,7 @@ export const userBalances = mysqlTable(
     balance: bigint("balance", { mode: "number" }).notNull(), // share balance
   },
   (table) => ({
-    addressIndex: uniqueIndex("address").on(table.address),
+    addressIndex: index("address").on(table.address),
   }),
 );
 

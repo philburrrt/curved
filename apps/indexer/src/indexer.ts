@@ -29,9 +29,6 @@ export class Indexer {
       CurveABI.abi,
       this.provider,
     );
-    this.accountingWorker.on("message", (event) => {
-      console.log("Worker received", event);
-    });
   }
 
   public async start() {
@@ -63,7 +60,7 @@ export class Indexer {
         }
         case "Trade": {
           // this.handleTrade(event); // enter trade in db
-          this.shareWorker.postMessage(workerEvent);
+          this.accountingWorker.postMessage(workerEvent);
           break;
         }
       }
