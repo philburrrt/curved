@@ -29,10 +29,11 @@ export class Indexer {
       CurveABI.abi,
       this.provider,
     );
+    this.start();
   }
 
-  public async start() {
-    this.curve.on("*", async (event) => {
+  public start() {
+    this.curve.on("*", (event) => {
       console.log("Event", event.event);
 
       const workerEvent = {
@@ -69,14 +70,14 @@ export class Indexer {
 
   handleTrade = async (event: any) => {
     const entry = {
-      amount: event.args[4].toNumber(),
-      hash: event.transactionHash,
-      owner: event.args[3].toLowerCase(),
-      price: event.args[5].toString(),
       shareId: event.args[0].toNumber(),
       side: event.args[1].toNumber(),
-      supply: event.args[6].toNumber(),
       trader: event.args[2].toLowerCase(),
+      owner: event.args[3].toLowerCase(),
+      amount: event.args[4].toNumber(),
+      price: event.args[5].toString(),
+      supply: event.args[6].toNumber(),
+      hash: event.transactionHash,
     };
 
     console.log("Inserting trade", entry);

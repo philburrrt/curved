@@ -20,17 +20,30 @@ export const handleShareCreated = async (event: any) => {
   const shareId = event.args[1];
   // add 1 to the creator's balance of this share
 
-  await db.insert(userBalances).values({
-    address: creator.toLowerCase(),
-    shareId,
-    balance: 1,
-  });
+  try {
+    await db.insert(userBalances).values({
+      address: creator.toLowerCase(),
+      shareId,
+      balance: 1,
+    });
+  } catch (e) {
+    console.log("error inserting balance", e);
+  }
 };
+
+/*
+  db table is empty
+  2 trades get sent here back to back
+  first checks to see if exists, it does as intended, then it inserts
+  second checks to see if exists, it doesn't. not as intended, then it inserts when it should update
+  after running the script again, it recognizes the existing data immediately and works as intended
+  seems like the db is not being updated in time for the second trade to see the first trade's insert
+*/
 
 export const handleTrade = async (event: any) => {
   const shareId = event.args[0];
   const side = event.args[1];
-  const trader = event.args[2].toLowerCase().slice(0, 10);
+  const trader = event.args[2].toLowerCase();
   const amount = event.args[4];
 
   console.log("[user_acc_thread] handling trade", {
@@ -40,41 +53,52 @@ export const handleTrade = async (event: any) => {
     amount,
   });
 
-  // add `amount` to the trader's balance of this share if side is 0
-  // add - `amount` to the trader's balance of this share if side is 1
-
-  const status = await db.query.userBalances.findFirst({
-    where: (row) => eq(row.address, trader) && eq(row.shareId, shareId),
+  // check if trader has shareId in userBalances
+  const existing = await db.query.userBalances.findFirst({
+    where:
+      eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
   });
 
-  console.log("status: ", status, trader.slice(0, 10));
-  if (!status) {
-    console.log("inserting new user balance for trader: ", trader.slice(0, 10));
+  console.log(
+    "[user_acc_thread] existing",
+    existing,
+    trader.slice(0, 6),
+    shareId,
+  );
+
+  let balance;
+  if (existing?.balance) {
+    balance = existing.balance + amount;
+    try {
+      console.log(
+        "[user_acc_thread] updating balance",
+        trader.slice(0, 6),
+        shareId,
+      );
+      await db
+        .update(userBalances)
+        .set({ balance })
+        .where(
+          eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
+        );
+    } catch (e) {
+      console.log("error updating balance", e);
+    }
+  } else {
+    console.log(
+      "[user_acc_thread] inserting balance",
+      trader.slice(0, 6),
+      shareId,
+    );
+
     try {
       await db.insert(userBalances).values({
-        address: trader.toLowerCase(),
+        address: trader,
         shareId,
         balance: amount,
       });
     } catch (e) {
-      console.log("error inserting new user balance: ", e);
+      console.log("error inserting balance", e);
     }
-    return;
-  }
-
-  const newBalance =
-    side === 0 ? status.balance + amount : status.balance - amount;
-
-  console.log("updating user balance for trader: ", trader.slice(0, 10));
-
-  try {
-    await db
-      .update(userBalances)
-      .set({ balance: newBalance })
-      .where(
-        eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
-      );
-  } catch (e) {
-    console.log("error updating user balance: ", e);
   }
 };

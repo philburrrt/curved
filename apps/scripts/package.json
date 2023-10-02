@@ -8,6 +8,7 @@
     "anvil": "cd contracts && anvil --block-time 1 --chain-id 9999",
     "build": "cd contracts && forge build",
     "db": "node db/index.js",
+    "debug-indexer": "node dev/debugIndexer.js",
     "deploy": "pnpm run env -- pnpm run _deploy",
     "dev": "conc \"pnpm run anvil --silent\" \"pnpm run deploy\"",
     "env": "dotenv -e ../../.env",
