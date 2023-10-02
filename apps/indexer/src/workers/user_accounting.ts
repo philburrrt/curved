@@ -1,23 +1,21 @@
 // worker.js
 import { parentPort } from "worker_threads";
 import { db } from "../DB";
-import { userBalances } from "../schema";
+import { user, userBalances } from "../schema";
 import { eq } from "drizzle-orm";
 
-parentPort!.on("message", (event: any) => {
-  console.log("User received event");
-
+parentPort!.on("message", async (event: any) => {
   if (event.event === "ShareCreated") {
-    handleShareCreated(event);
+    await handleShareCreated(event);
   }
 
   if (event.event === "Trade") {
-    handleTrade(event);
+    await handleTrade(event);
   }
 });
 
 export const handleShareCreated = async (event: any) => {
-  console.log("handling share created");
+  console.log("[user_acc_thread] handling share created");
   const creator = event.args[0];
   const shareId = event.args[1];
   // add 1 to the creator's balance of this share
@@ -30,45 +28,51 @@ export const handleShareCreated = async (event: any) => {
 };
 
 export const handleTrade = async (event: any) => {
-  console.log("handling trade");
   const shareId = event.args[0];
   const side = event.args[1];
-  const trader = event.args[2];
+  const trader = event.args[2].toLowerCase().slice(0, 10);
   const amount = event.args[4];
+
+  console.log("[user_acc_thread] handling trade", {
+    shareId,
+    side,
+    trader,
+    amount,
+  });
 
   // add `amount` to the trader's balance of this share if side is 0
   // add - `amount` to the trader's balance of this share if side is 1
 
-  const shareState = await db.query.userBalances.findFirst({
-    columns: {
-      balance: true,
-    },
-    where: (row, { eq }) => eq(row.shareId, shareId) && eq(row.address, trader),
+  const status = await db.query.userBalances.findFirst({
+    where: (row) => eq(row.address, trader) && eq(row.shareId, shareId),
   });
 
-  console.log(`share state ${trader}`, shareState);
-
-  if (!shareState) {
-    await db.insert(userBalances).values({
-      address: trader.toLowerCase(),
-      shareId,
-      balance: amount,
-    });
+  console.log("status: ", status, trader.slice(0, 10));
+  if (!status) {
+    console.log("inserting new user balance for trader: ", trader.slice(0, 10));
+    try {
+      await db.insert(userBalances).values({
+        address: trader.toLowerCase(),
+        shareId,
+        balance: amount,
+      });
+    } catch (e) {
+      console.log("error inserting new user balance: ", e);
+    }
     return;
-  } else {
-    const newBalance =
-      side === 0 ? shareState.balance + amount : shareState.balance - amount;
-
-    console.log("user new balance", newBalance);
-
-    // TODO: why is this trying to insert a new row?
-    await db
-      .update(userBalances)
-      .set({
-        balance: newBalance,
-      })
-      .where(
-        eq(userBalances.shareId, shareId) && eq(userBalances.address, trader),
-      );
   }
+
+  const newBalance =
+    side === 0 ? status.balance + amount : status.balance - amount;
+
+  console.log("updating user balance for trader: ", trader.slice(0, 10));
+
+  await db
+    .update(userBalances)
+    .set({ balance: newBalance })
+    .where(
+      eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
+    );
+
+  let balance;
 };

@@ -26,12 +26,12 @@ import { NANOID_LENGTH } from "./nanoid";
 export const content = mysqlTable(
   "content",
   {
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
     description: varchar("description", { length: MAX_DESCRIPTION_LENGTH }),
     id: serial("id").primaryKey(),
     owner: varchar("owner", { length: ETH_ADDRESS_LENGTH }).notNull(),
     shareId: bigint("share_id", { mode: "number" }).notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
     url: varchar("url", { length: 255 }).notNull(),
   },
   (table) => ({
@@ -70,7 +70,12 @@ export const userBalances = mysqlTable(
     balance: bigint("balance", { mode: "number" }).notNull(), // share balance
   },
   (table) => ({
-    addressIndex: uniqueIndex("address").on(table.address),
+    addressShareIdIndex: uniqueIndex("addressShareId").on(
+      table.address,
+      table.shareId,
+    ),
+    addressIndex: index("address").on(table.address),
+    shareIdIndex: index("shareId").on(table.shareId),
   }),
 );
 
