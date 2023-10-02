@@ -67,12 +67,14 @@ export const handleTrade = async (event: any) => {
 
   console.log("updating user balance for trader: ", trader.slice(0, 10));
 
-  await db
-    .update(userBalances)
-    .set({ balance: newBalance })
-    .where(
-      eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
-    );
-
-  let balance;
+  try {
+    await db
+      .update(userBalances)
+      .set({ balance: newBalance })
+      .where(
+        eq(userBalances.address, trader) && eq(userBalances.shareId, shareId),
+      );
+  } catch (e) {
+    console.log("error updating user balance: ", e);
+  }
 };
