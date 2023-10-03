@@ -1,9 +1,14 @@
 // worker.js
-import { parentPort } from "worker_threads";
-import { db } from "../DB";
-import { userBalances, trade } from "db";
-import { eq, and } from "drizzle-orm";
+import { userBalances } from "db";
+import { and, eq } from "drizzle-orm";
 import PQueue from "p-queue";
+import { parentPort } from "worker_threads";
+
+import { db } from "../DB";
+
+if (!parentPort) {
+  throw new Error("No parentPort");
+}
 
 // receives trade and sharecreaed event
 // if sharecreated, add 1 to creators share balance in userBalances table
@@ -21,8 +26,8 @@ const handleMessage = async (event: any) => {
     try {
       await db.insert(userBalances).values({
         address: owner.toLowerCase(),
-        shareId,
         balance: 1,
+        shareId,
       });
     } catch (e) {
       console.error("error inserting creator balance", e);
@@ -34,8 +39,8 @@ const handleMessage = async (event: any) => {
     const amount = parseInt(event.args[4]);
 
     const trade = {
-      from: trader.toLowerCase(),
       amount: side === "0" ? amount : -amount,
+      from: trader.toLowerCase(),
     };
 
     let existingBalance;
@@ -60,8 +65,8 @@ const handleMessage = async (event: any) => {
       try {
         await db.insert(userBalances).values({
           address: trade.from.toLowerCase(),
-          shareId,
           balance: trade.amount,
+          shareId,
         });
 
         return;
@@ -102,6 +107,6 @@ const handleMessage = async (event: any) => {
   }
 };
 
-parentPort!.on("message", async (event: any) => {
+parentPort.on("message", async (event: any) => {
   queue.add(() => handleMessage(event));
 });

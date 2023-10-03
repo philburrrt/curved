@@ -27,6 +27,8 @@ export interface Repost extends BasePost {
   type: PostType.Repost;
   data: {
     caption: string | null;
+    referencePostId: string;
+    repost: Post | null;
   };
 }
 

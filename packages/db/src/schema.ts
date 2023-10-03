@@ -170,17 +170,16 @@ export const user = mysqlTable(
 export const userBalances = mysqlTable(
   "user_balances",
   {
-    id: serial("id").primaryKey(),
     address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
-    shareId: bigint("share_id", { mode: "number" }).notNull(),
     balance: bigint("balance", { mode: "number" }).notNull(),
+    id: serial("id").primaryKey(),
+    shareId: bigint("share_id", { mode: "number" }).notNull(),
   },
   (table) => ({
     addressShareIdIndex: uniqueIndex("addressShareId").on(
       table.address,
       table.shareId,
     ),
-    addressIndex: index("address").on(table.address),
     sharedIdIndex: index("shareId").on(table.shareId),
   }),
 );
@@ -209,9 +208,15 @@ export const userBalancesRelations = relations(userBalances, ({ one }) => ({
     fields: [userBalances.address],
     references: [user.address],
   }),
+  
+export const sharesRelations = relations(userBalances, ({ one }) => ({
   nftPost: one(nftPost, {
     fields: [userBalances.shareId],
     references: [nftPost.shareId],
+  }),
+  user: one(user, {
+    fields: [userBalances.address],
+    references: [user.address],
   }),
 }));
 

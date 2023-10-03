@@ -6,6 +6,7 @@
       "outputs": ["build/**", "dist/**"]
     },
     "client#build": {
+      "dependsOn": ["^build"],
       "outputs": [".next/**"],
       "env": [
         "NEXT_PUBLIC_CONTRACT_ADDRESS",
@@ -18,9 +19,13 @@
       ]
     },
     "db#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
       "env": ["DATABASE_URL"]
     },
     "indexer#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
       "env": ["DATABASE_URL", "WS_URL", "CONTRACT_ADDRESS"]
     },
     "start": {

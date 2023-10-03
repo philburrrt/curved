@@ -5,11 +5,10 @@ import { useRef, useTransition } from "react";
 import { BiRepost } from "react-icons/bi";
 
 import { useAuth } from "@/app/AuthProvider";
-import { Post } from "@/src/types/post";
+import { Post, PostType } from "@/src/types/post";
 
 import { DialogContent, DialogRoot, DialogTrigger } from "./Dialog";
-import { PostImage } from "./PostImage";
-import { PostTopBar } from "./PostTopBar";
+import { RepostCard } from "./RepostCard";
 import { SubmitButton } from "./SubmitButton";
 
 interface Props {
@@ -70,19 +69,21 @@ export function RepostButton({ post }: Props) {
 
       <DialogContent title="Repost">
         <form onSubmit={repost} className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-2">
-            <PostTopBar owner={user} disableLink />
-            <BiRepost className="text-lg text-slate-400" />
-            <span className="text-sm text-slate-400">
-              {post.owner.username ?? post.owner.address}
-            </span>
-          </div>
-
-          <div className="space-y-2 px-8 opacity-80">
-            <PostTopBar owner={post.owner} disableLink />
-            <PostImage post={post} />
-            <p className="text-sm text-slate-400">{post.data.caption}</p>
-          </div>
+          <RepostCard
+            disableLink
+            disableActions
+            post={{
+              createdAt: new Date().toLocaleString(),
+              data: {
+                caption: null,
+                referencePostId: post.id,
+                repost: post,
+              },
+              id: "fake",
+              owner: user,
+              type: PostType.Repost,
+            }}
+          />
 
           <textarea
             ref={captionRef}
@@ -90,9 +91,8 @@ export function RepostButton({ post }: Props) {
             placeholder="Add a comment..."
             maxLength={MAX_CAPTION_LENGTH}
             rows={2}
-            className={`w-full rounded-lg bg-slate-900 px-3 py-1 placeholder:text-slate-400 ${
-              disabled ? "opacity-50" : ""
-            }`}
+            className={`w-full rounded-lg bg-slate-900 px-3 py-1 placeholder:text-slate-400 ${disabled ? "opacity-50" : ""
+              }`}
           />
 
           <div className="flex justify-center">

@@ -1,11 +1,12 @@
-import { Worker } from "worker_threads";
+import { nftPost, pendingPost, post, trade } from "db";
 import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
-import { nanoidLowercase } from "./nanoid";
+import { Worker } from "worker_threads";
+
 import CurveABI from "./abi/Curved.json" assert { type: "json" };
 import { db } from "./DB";
-import { trade, post, pendingPost, nftPost } from "db";
+import { nanoidLowercase } from "./nanoid";
 const { WS_URL, CONTRACT_ADDRESS } = process.env;
 
 config();
@@ -37,20 +38,20 @@ export class Indexer {
       console.log("Event", event.event);
 
       const workerEvent = {
-        blockNumber: event.blockNumber,
-        blockHash: event.blockHash,
-        transactionIndex: event.transactionIndex,
-        removed: event.removed,
         address: event.address,
-        data: event.data,
-        topics: event.topics,
-        transactionHash: event.transactionHash,
-        logIndex: event.logIndex,
-        event: event.event,
-        eventSignature: event.eventSignature,
         args: event.args.map((arg: any) => {
           return arg._isBigNumber ? arg.toString() : arg;
         }),
+        blockHash: event.blockHash,
+        blockNumber: event.blockNumber,
+        data: event.data,
+        event: event.event,
+        eventSignature: event.eventSignature,
+        logIndex: event.logIndex,
+        removed: event.removed,
+        topics: event.topics,
+        transactionHash: event.transactionHash,
+        transactionIndex: event.transactionIndex,
       };
 
       switch (event.event) {
@@ -72,14 +73,14 @@ export class Indexer {
 
   handleTrade = async (event: any) => {
     const entry = {
+      amount: event.args[4].toNumber(),
+      hash: event.transactionHash,
+      owner: event.args[3].toLowerCase(),
+      price: event.args[5].toString(),
       shareId: event.args[0].toNumber(),
       side: event.args[1].toNumber(),
-      trader: event.args[2].toLowerCase(),
-      owner: event.args[3].toLowerCase(),
-      amount: event.args[4].toNumber(),
-      price: event.args[5].toString(),
       supply: event.args[6].toNumber(),
-      hash: event.transactionHash,
+      trader: event.args[2].toLowerCase(),
     };
 
     console.log("Inserting trade", entry);

@@ -4,6 +4,11 @@ import { db } from "../DB";
 import { shareData } from "db";
 import { eq, and } from "drizzle-orm";
 import PQueue from "p-queue";
+import { parentPort } from "worker_threads";
+
+if (!parentPort) {
+  throw new Error("No parentPort");
+}
 
 const queue = new PQueue({ concurrency: 1 });
 
@@ -47,6 +52,6 @@ const handleMessage = async (event: any) => {
   }
 };
 
-parentPort!.on("message", async (event: any) => {
+parentPort.on("message", async (event: any) => {
   queue.add(() => handleMessage(event));
 });
