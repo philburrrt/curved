@@ -54,6 +54,7 @@ export class Indexer {
       };
 
       this.userWorker.postMessage(workerEvent);
+      this.shareWorker.postMessage(workerEvent);
 
       // switch (event.event) {
       //   case "ShareCreated": {
