@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-const { LOCAL_CURVED_ADDRESS, LOCAL_PRIVATE_KEY } = process.env;
+const { CONTRACT_ADDRESS, LOCAL_PRIVATE_KEY } = process.env;
 import { ethers } from "ethers";
 import { CURVED_ABI } from "../abi/CurvedAbi.js";
 import assert from "assert";
@@ -8,7 +8,7 @@ import { getReason } from "../utils.js";
 
 const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
 const wallet = new ethers.Wallet(LOCAL_PRIVATE_KEY, provider);
-const curved = new ethers.Contract(LOCAL_CURVED_ADDRESS, CURVED_ABI, wallet);
+const curved = new ethers.Contract(CONTRACT_ADDRESS, CURVED_ABI, wallet);
 
 /*
 Flow:
@@ -86,7 +86,7 @@ const testPurchaseManyShares = async () => {
   for (let i = 0; i < users.length; i++) {
     const account = users[i];
     const curvedInstance = new ethers.Contract(
-      LOCAL_CURVED_ADDRESS,
+      CONTRACT_ADDRESS,
       CURVED_ABI,
       new ethers.Wallet(account.privateKey, provider),
     );
@@ -108,7 +108,7 @@ const testSellManyShares = async () => {
     const account = users[i];
     console.log("account: ", account);
     const curvedInstance = new ethers.Contract(
-      LOCAL_CURVED_ADDRESS,
+      CONTRACT_ADDRESS,
       CURVED_ABI,
       new ethers.Wallet(account.privateKey, provider),
     );

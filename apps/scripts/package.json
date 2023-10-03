@@ -12,7 +12,7 @@
     "deploy": "pnpm run env -- pnpm run _deploy",
     "env": "dotenv -e ../../.env",
     "init-rewards": "node dev/initRewards.js",
-    "mock-events": "node dev/mockEvents.js",
+    "mock-events": "pnpm run env -- node dev/mockEvents.js",
     "price-chart": "node data/priceCurve.js",
     "test": "cd contracts && forge test -vvv --fork-url https://eth-goerli.g.alchemy.com/v2/vJij3X-b5FLSP-eNIw8m25CLCEdMjQ7b"
   },
