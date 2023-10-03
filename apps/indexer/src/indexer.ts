@@ -6,6 +6,7 @@ import { nanoidLowercase } from "./nanoid";
 import CurveABI from "./abi/Curved.json" assert { type: "json" };
 import { db } from "./DB";
 import { trade, post, pendingPost, nftPost } from "db";
+import { bigint } from "drizzle-orm/pg-core";
 const { WS_URL, CONTRACT_ADDRESS } = process.env;
 
 config();
@@ -130,7 +131,7 @@ export class Indexer {
         amount: 1,
         hash: event.transactionHash,
         owner: owner.toLowerCase(),
-        price: 0,
+        price: BigInt(0),
         shareId: shareId,
         side: 0,
         supply: 1,
