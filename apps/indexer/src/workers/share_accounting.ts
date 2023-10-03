@@ -1,19 +1,50 @@
 // worker.js
 import { parentPort } from "worker_threads";
 import { db } from "../DB";
-import { userBalances, trade } from "db";
+import { shareData } from "db";
 import { eq, and } from "drizzle-orm";
 import PQueue from "p-queue";
-
-// receives trade and sharecreaed event
-// if sharecreated, add 1 to creators share balance in userBalances table
-// if trade, check to see if there is a balance of that shareId in userBalances table
-// if there is, .update() the balance. if not .insert() the balance
 
 const queue = new PQueue({ concurrency: 1 });
 
 const handleMessage = async (event: any) => {
-  console.log("Handling event", event);
+  if (event.event !== "Trade") return;
+  const shareId = event.args[0];
+  const price = event.args[5];
+
+  let data;
+  try {
+    data = await db.query.shareData.findFirst({
+      where: (row, { eq }) => eq(row.shareId, shareId),
+    });
+  } catch (e) {
+    console.error("error querying existing share data", e);
+  }
+
+  if (!data) {
+    try {
+      await db.insert(shareData).values({
+        shareId,
+        volume: price,
+      });
+    } catch (e) {
+      console.error("error inserting share data", e);
+    }
+  }
+
+  if (data?.volume && data?.volume.toString() !== "0") {
+    const newVolume = data.volume + BigInt(price);
+    try {
+      await db
+        .update(shareData)
+        .set({
+          volume: newVolume,
+        })
+        .where(and(eq(shareData.shareId, shareId)));
+    } catch (e) {
+      console.error("error updating share data", e);
+    }
+  }
 };
 
 parentPort!.on("message", async (event: any) => {

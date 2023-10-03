@@ -6,7 +6,6 @@ import { nanoidLowercase } from "./nanoid";
 import CurveABI from "./abi/Curved.json" assert { type: "json" };
 import { db } from "./DB";
 import { trade, post, pendingPost, nftPost } from "db";
-import { bigint } from "drizzle-orm/pg-core";
 const { WS_URL, CONTRACT_ADDRESS } = process.env;
 
 config();
@@ -54,19 +53,19 @@ export class Indexer {
         }),
       };
 
-      this.userWorker.postMessage(workerEvent);
-      this.shareWorker.postMessage(workerEvent);
+      switch (event.event) {
+        case "ShareCreated": {
+          this.handleShareCreated(event); // enter initial trade in db
+          this.userWorker.postMessage(workerEvent);
 
-      // switch (event.event) {
-      //   case "ShareCreated": {
-      //     this.handleShareCreated(event); // enter initial trade in db
-      //     break;
-      //   }
-      //   case "Trade": {
-      //     this.handleTrade(event); // enter trade in db
-      //     break;
-      //   }
-      // }
+          break;
+        }
+        case "Trade": {
+          this.handleTrade(event); // enter trade in db
+          this.shareWorker.postMessage(workerEvent);
+          break;
+        }
+      }
     });
   }
 
