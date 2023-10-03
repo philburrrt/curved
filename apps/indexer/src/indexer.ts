@@ -49,18 +49,19 @@ export class Indexer {
         }),
       };
 
-      switch (event.event) {
-        case "ShareCreated": {
-          this.handleShareCreated(event); // enter initial trade in db
-          this.accountingWorker.postMessage(workerEvent);
-          break;
-        }
-        case "Trade": {
-          this.handleTrade(event); // enter trade in db
-          this.accountingWorker.postMessage(workerEvent);
-          break;
-        }
-      }
+      this.accountingWorker.postMessage(workerEvent);
+
+      // ! disabled while testing workers
+      // switch (event.event) {
+      //   case "ShareCreated": {
+      //     this.handleShareCreated(event); // enter initial trade in db
+      //     break;
+      //   }
+      //   case "Trade": {
+      //     this.handleTrade(event); // enter trade in db
+      //     break;
+      //   }
+      // }
     });
   }
 

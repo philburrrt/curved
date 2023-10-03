@@ -6,8 +6,10 @@
   "scripts": {
     "_deploy": "cd contracts && forge create --rpc-url $RPC_URL --private-key $LOCAL_PRIVATE_KEY src/Curved.sol:Curved",
     "anvil": "cd contracts && anvil --block-time 1 --chain-id 9999",
+    "anvil:deploy": "cd contracts && anvil --block-time 1 --chain-id 9999 & sleep 5 && forge create --rpc-url $RPC_URL --private-key $LOCAL_PRIVATE_KEY src/Curved.sol:Curved",
     "build": "cd contracts && forge build",
     "db": "node db/index.js",
+    "debug-indexer": "pnpm run env -- node dev/debugIndexer.js",
     "deploy": "pnpm run env -- pnpm run _deploy",
     "env": "dotenv -e ../../.env",
     "init-rewards": "node dev/initRewards.js",
