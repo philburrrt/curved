@@ -57,8 +57,8 @@ const testPurchaseShare = async () => {
       CURVED_ABI,
       new Wallet(users[0].privateKey, provider),
     );
-    const cost = await contractInstance.getBuyPriceAfterFee(0, 2);
-    const tx = await contractInstance.buyShare(0, 2, {
+    const cost = await contractInstance.getBuyPriceAfterFee(0, 4);
+    const tx = await contractInstance.buyShare(0, 4, {
       value: cost,
     });
     await tx.wait();
@@ -77,7 +77,7 @@ const testSellShare = async () => {
       CURVED_ABI,
       new Wallet(users[0].privateKey, provider),
     );
-    const tx = await contractInstance.sellShare(0, 1);
+    const tx = await contractInstance.sellShare(0, 2);
     await tx.wait();
     console.log("1 shares sold", users[0].address.slice(0, 6));
   } catch (e) {
@@ -91,24 +91,5 @@ const testSellShare = async () => {
   await setup();
   await testCreateShare();
   await testPurchaseShare();
-  // ! bug: user_accounting thread requires a sleep timer here to read balance after buy before updating during sell
-  // http://localhost:3000/api/db/table/user_balances result:
-  /*
-  [
-    {
-      "id": "1",
-      "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
-      "share_id": "1",
-      "balance": "1"
-    },
-    {
-      "id": "2",
-      "address": "0x949c78f9a0503bc1157bdac310c06cea15f96f1b",
-      "share_id": "0",
-      "balance": "-1"
-    }
-  ]
-  */
-  await new Promise((resolve) => setTimeout(resolve, 1000));
   await testSellShare();
 })();

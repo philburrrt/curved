@@ -3,13 +3,16 @@ import { parentPort } from "worker_threads";
 import { db } from "../DB";
 import { userBalances, trade } from "db";
 import { eq, and } from "drizzle-orm";
+import PQueue from "p-queue";
 
 // receives trade and sharecreaed event
 // if sharecreated, add 1 to creators share balance in userBalances table
 // if trade, check to see if there is a balance of that shareId in userBalances table
 // if there is, .update() the balance. if not .insert() the balance
 
-parentPort!.on("message", async (event: any) => {
+const queue = new PQueue({ concurrency: 1 });
+
+const handleMessage = async (event: any) => {
   const eventType = event.event;
   if (eventType === "ShareCreated") {
     const owner = event.args[0];
@@ -37,7 +40,6 @@ parentPort!.on("message", async (event: any) => {
 
     console.log("[user_accounting] processing trade", trade);
 
-    // ! bug: this returns the owner balance even if querying the trader. seems like the `where` clause is incorrect
     let existingBalance;
     try {
       existingBalance = await db
@@ -73,16 +75,37 @@ parentPort!.on("message", async (event: any) => {
     }
 
     const balance = existingBalance[0]?.balance;
+    console.log("balance type", typeof balance);
     if (!balance)
       return console.log("[user_accounting] error querying existing balance");
-    console.log(
-      "[user_accounting] updating balance",
-      trade.from.slice(0, 6),
-      balance,
-      trade.amount,
-    );
+
+    if (balance + trade.amount === 0) {
+      console.log(
+        "[user_accounting] deleting balance",
+        trade.from.slice(0, 6),
+        balance,
+        trade.amount,
+        balance + trade.amount,
+      );
+
+      await db
+        .delete(userBalances)
+        .where(
+          and(
+            eq(userBalances.address, trade.from),
+            eq(userBalances.shareId, shareId),
+          ),
+        );
+      return;
+    }
 
     try {
+      console.log(
+        "[user_accounting] updating balance",
+        trade.from.slice(0, 6),
+        balance,
+        trade.amount,
+      );
       await db
         .update(userBalances)
         .set({ balance: balance + trade.amount })
@@ -96,4 +119,8 @@ parentPort!.on("message", async (event: any) => {
       console.error("error updating balance", e);
     }
   }
+};
+
+parentPort!.on("message", async (event: any) => {
+  queue.add(() => handleMessage(event));
 });
