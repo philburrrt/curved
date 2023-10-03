@@ -62,10 +62,11 @@ export class Indexer {
         }
         case "Trade": {
           this.handleTrade(event); // enter trade in db
-          this.shareWorker.postMessage(workerEvent);
           break;
         }
       }
+
+      this.shareWorker.postMessage(workerEvent);
     });
   }
 
