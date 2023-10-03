@@ -2,6 +2,7 @@
 import { parentPort } from "worker_threads";
 import { db } from "../DB";
 import { userBalances, trade } from "db";
+import { eq } from "drizzle-orm";
 
 // receives trade and sharecreaed event
 // if sharecreated, add 1 to creators share balance in userBalances table
@@ -24,6 +25,55 @@ parentPort!.on("message", async (event: any) => {
       console.error("error inserting creator balance", e);
     }
   } else if (eventType === "Trade") {
-    //
+    const shareId = event.args[0];
+    const side = event.args[1];
+    const trader = event.args[2];
+    const amount = parseInt(event.args[4]);
+
+    const trade = {
+      from: trader.toLowerCase(),
+      amount: side === "0" ? amount : -amount,
+      shareId,
+      side,
+    };
+
+    console.log("[user_accounting] processing trade", trade);
+
+    const existingBalance = await db.query.userBalances.findFirst({
+      columns: {
+        balance: true,
+      },
+      where: (row, { eq }) =>
+        eq(row.address, trade.from) && eq(row.shareId, shareId),
+    });
+
+    if (!existingBalance?.balance) {
+      console.log(
+        "[user_accounting] no existing balance",
+        trade.from.slice(0, 6),
+        shareId,
+      );
+      await db.insert(userBalances).values({
+        address: trade.from,
+        shareId,
+        balance: trade.amount,
+      });
+    } else {
+      console.log(
+        "[user_accounting] existing balance. updating",
+        existingBalance,
+        trade.from.slice(0, 6),
+        shareId,
+      );
+      await db
+        .update(userBalances)
+        .set({
+          balance: existingBalance.balance + trade.amount,
+        })
+        .where(
+          eq(userBalances.address, trade.from) &&
+            eq(userBalances.shareId, shareId),
+        );
+    }
   }
 });
