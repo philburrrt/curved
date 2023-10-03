@@ -33,14 +33,15 @@ parentPort!.on("message", async (event: any) => {
     const trade = {
       from: trader.toLowerCase(),
       amount: side === "0" ? amount : -amount,
-      shareId,
-      side,
     };
 
     console.log("[user_accounting] processing trade", trade);
 
+    // ! bug: this returns the owner balance even if querying the trader. seems like the `where` clause is incorrect
     const existingBalance = await db.query.userBalances.findFirst({
       columns: {
+        address: true,
+        shareId: true,
         balance: true,
       },
       where: (row, { eq }) =>
@@ -65,10 +66,12 @@ parentPort!.on("message", async (event: any) => {
         trade.from.slice(0, 6),
         shareId,
       );
+      const newBalance = existingBalance.balance + trade.amount;
+      console.log("[user_accounting] new balance", newBalance);
       await db
         .update(userBalances)
         .set({
-          balance: existingBalance.balance + trade.amount,
+          balance: newBalance,
         })
         .where(
           eq(userBalances.address, trade.from) &&
