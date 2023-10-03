@@ -55,16 +55,16 @@ export class Indexer {
 
       this.userWorker.postMessage(workerEvent);
 
-      switch (event.event) {
-        case "ShareCreated": {
-          this.handleShareCreated(event); // enter initial trade in db
-          break;
-        }
-        case "Trade": {
-          this.handleTrade(event); // enter trade in db
-          break;
-        }
-      }
+      // switch (event.event) {
+      //   case "ShareCreated": {
+      //     this.handleShareCreated(event); // enter initial trade in db
+      //     break;
+      //   }
+      //   case "Trade": {
+      //     this.handleTrade(event); // enter trade in db
+      //     break;
+      //   }
+      // }
     });
   }
 

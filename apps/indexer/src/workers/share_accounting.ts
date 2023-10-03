@@ -12,7 +12,9 @@ import PQueue from "p-queue";
 
 const queue = new PQueue({ concurrency: 1 });
 
-const handleMessage = async (event: any) => {};
+const handleMessage = async (event: any) => {
+  console.log("Handling event", event);
+};
 
 parentPort!.on("message", async (event: any) => {
   queue.add(() => handleMessage(event));
