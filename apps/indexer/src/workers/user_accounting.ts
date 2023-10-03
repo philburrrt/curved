@@ -38,8 +38,6 @@ const handleMessage = async (event: any) => {
       amount: side === "0" ? amount : -amount,
     };
 
-    console.log("[user_accounting] processing trade", trade);
-
     let existingBalance;
     try {
       existingBalance = await db
@@ -54,8 +52,6 @@ const handleMessage = async (event: any) => {
     } catch (e) {
       console.error("error querying existing balance", e);
     }
-
-    console.log("[user_accounting] existing balance", existingBalance);
 
     if (!existingBalance)
       return console.log("[user_accounting] error querying existing balance");
@@ -75,19 +71,10 @@ const handleMessage = async (event: any) => {
     }
 
     const balance = existingBalance[0]?.balance;
-    console.log("balance type", typeof balance);
     if (!balance)
       return console.log("[user_accounting] error querying existing balance");
 
     if (balance + trade.amount === 0) {
-      console.log(
-        "[user_accounting] deleting balance",
-        trade.from.slice(0, 6),
-        balance,
-        trade.amount,
-        balance + trade.amount,
-      );
-
       await db
         .delete(userBalances)
         .where(
@@ -100,12 +87,6 @@ const handleMessage = async (event: any) => {
     }
 
     try {
-      console.log(
-        "[user_accounting] updating balance",
-        trade.from.slice(0, 6),
-        balance,
-        trade.amount,
-      );
       await db
         .update(userBalances)
         .set({ balance: balance + trade.amount })
