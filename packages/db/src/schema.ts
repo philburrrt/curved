@@ -64,11 +64,12 @@ export const nftPost = mysqlTable(
   }),
 );
 
-export const nftPostRelations = relations(nftPost, ({ one }) => ({
+export const nftPostRelations = relations(nftPost, ({ one, many }) => ({
   post: one(post, {
     fields: [nftPost.postId],
     references: [post.id],
   }),
+  shares: many(userBalances),
 }));
 
 export const pendingPost = mysqlTable(
@@ -166,9 +167,39 @@ export const user = mysqlTable(
   }),
 );
 
+export const userBalances = mysqlTable(
+  "user_balances",
+  {
+    id: serial("id").primaryKey(),
+    address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    shareId: bigint("share_id", { mode: "number" }).notNull(),
+    balance: bigint("balance", { mode: "number" }).notNull(),
+  },
+  (table) => ({
+    addressShareIdIndex: uniqueIndex("addressShareId").on(
+      table.address,
+      table.shareId,
+    ),
+    addressIndex: index("address").on(table.address),
+    sharedIdIndex: index("shareId").on(table.shareId),
+  }),
+);
+
+export const sharesRelations = relations(userBalances, ({ one }) => ({
+  user: one(user, {
+    fields: [userBalances.address],
+    references: [user.address],
+  }),
+  nftPost: one(nftPost, {
+    fields: [userBalances.shareId],
+    references: [nftPost.shareId],
+  }),
+}));
+
 export const userRelations = relations(user, ({ many }) => ({
   posts: many(nftPost),
   reposts: many(repost),
+  shares: many(userBalances),
 }));
 
 export const ethereumSession = mysqlTable(
