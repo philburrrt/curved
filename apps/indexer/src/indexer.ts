@@ -11,13 +11,17 @@ const { WS_URL, CONTRACT_ADDRESS } = process.env;
 config();
 
 export class Indexer {
-  private accountingWorker: Worker;
+  private userWorker: Worker;
+  private shareWorker: Worker;
   private provider: ethers.providers.WebSocketProvider;
   private curve: ethers.Contract;
 
   constructor() {
-    this.accountingWorker = new Worker(
+    this.userWorker = new Worker(
       new URL("./workers/user_accounting.js", import.meta.url),
+    );
+    this.shareWorker = new Worker(
+      new URL("./workers/share_accounting.js", import.meta.url),
     );
     this.provider = new ethers.providers.WebSocketProvider(WS_URL ?? "");
     this.curve = new ethers.Contract(
@@ -49,19 +53,18 @@ export class Indexer {
         }),
       };
 
-      this.accountingWorker.postMessage(workerEvent); // TODO: once this works, move inside ShareCreated event to check for pending content
+      this.userWorker.postMessage(workerEvent); // TODO: once this works, move inside ShareCreated event to check for pending content
 
-      // ! disabled while testing workers
-      // switch (event.event) {
-      //   case "ShareCreated": {
-      //     this.handleShareCreated(event); // enter initial trade in db
-      //     break;
-      //   }
-      //   case "Trade": {
-      //     this.handleTrade(event); // enter trade in db
-      //     break;
-      //   }
-      // }
+      switch (event.event) {
+        case "ShareCreated": {
+          this.handleShareCreated(event); // enter initial trade in db
+          break;
+        }
+        case "Trade": {
+          this.handleTrade(event); // enter trade in db
+          break;
+        }
+      }
     });
   }
 
