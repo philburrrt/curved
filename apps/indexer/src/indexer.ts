@@ -49,7 +49,7 @@ export class Indexer {
         }),
       };
 
-      this.accountingWorker.postMessage(workerEvent);
+      this.accountingWorker.postMessage(workerEvent); // TODO: once this works, move inside ShareCreated event to check for pending content
 
       // ! disabled while testing workers
       // switch (event.event) {
