@@ -7,12 +7,12 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate service worker
-self.addEventListener("activate", (event) => {
-  console.log("Service worker activated");
-});
-
 // Fetch event
-self.addEventListener("fetch", (event) => {
-  console.log("Fetching:", event.request.url);
+self.addEventListener("push", (event) => {
+  const data = event.data.json();
+  console.log("Push received...");
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: "apple-touch-icon.png",
+  });
 });

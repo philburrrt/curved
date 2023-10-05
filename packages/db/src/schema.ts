@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   char,
+  datetime,
   index,
   mysqlEnum,
   mysqlTable,
@@ -258,3 +259,35 @@ export const session = mysqlTable(AUTH_SESSION_TABLE_NAME, {
   idleExpires: bigint("idle_expires", { mode: "number" }).notNull(),
   userId: varchar("user_id", { length: MAX_USERNAME_LENGTH }).notNull(),
 });
+
+export const pushNotifications = mysqlTable(
+  "push_notifications",
+  {
+    id: serial("id").primaryKey(),
+    address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
+    endpoint: varchar("endpoint", { length: 255 }).notNull(),
+    expirationTime: datetime("expiration_time"),
+    p256dh: varchar("p256dh", { length: 255 }).notNull(),
+    auth: varchar("auth", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .onUpdateNow()
+      .notNull(),
+  },
+  (table) => ({
+    uniqueIndex: uniqueIndex("address").on(table.address),
+  }),
+);
+
+export const pushNotificationsRelations = relations(
+  pushNotifications,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [pushNotifications.address],
+      references: [user.address],
+    }),
+  }),
+);

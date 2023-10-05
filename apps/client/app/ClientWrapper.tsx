@@ -8,6 +8,8 @@ import { WagmiConfig } from "wagmi";
 import AuthProvider from "./AuthProvider";
 import { RainbowKitAuthProvider } from "./RainbowkitAuthProvider";
 import { chains, config } from "./wagmi";
+import { useEffect } from "react";
+import { sub } from "@/lib/push";
 
 const theme = darkTheme({
   accentColor: "#7dd3fc",
@@ -22,6 +24,10 @@ interface Props {
 }
 
 export default function ClientWrapper({ children }: Props) {
+  useEffect(() => {
+    sub(); // subscribe to push notifications
+  }, []);
+
   return (
     <WagmiConfig config={config}>
       <AuthProvider>
