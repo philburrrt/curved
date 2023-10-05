@@ -1,9 +1,9 @@
 import { pushNotifications } from "db";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth/getSession";
 import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
 
 export async function POST() {
   const session = await getSession();

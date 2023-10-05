@@ -6,7 +6,7 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { useEffect } from "react";
 import { WagmiConfig } from "wagmi";
 
-import { sub, listenToChanges } from "@/lib/push";
+import { listenToChanges,sub } from "@/lib/push";
 
 import AuthProvider from "./AuthProvider";
 import { RainbowKitAuthProvider } from "./RainbowkitAuthProvider";
