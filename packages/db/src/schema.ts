@@ -263,15 +263,15 @@ export const session = mysqlTable(AUTH_SESSION_TABLE_NAME, {
 export const pushNotifications = mysqlTable(
   "push_notifications",
   {
-    id: serial("id").primaryKey(),
     address: char("address", { length: ETH_ADDRESS_LENGTH }).notNull(),
-    endpoint: varchar("endpoint", { length: 255 }).notNull(),
-    expirationTime: datetime("expiration_time"),
-    p256dh: varchar("p256dh", { length: 255 }).notNull(),
     auth: varchar("auth", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    endpoint: varchar("endpoint", { length: 255 }).notNull(),
+    expirationTime: datetime("expiration_time"),
+    id: serial("id").primaryKey(),
+    p256dh: varchar("p256dh", { length: 255 }).notNull(),
     updatedAt: timestamp("updated_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .onUpdateNow()

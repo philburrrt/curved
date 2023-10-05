@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { pushNotifications } from "db";
-import { and, eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+
 import { getSession } from "@/lib/auth/getSession";
+import { db } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   const address = session.user.address.toLowerCase();
 
   if (!endpoint || !p256dh || !auth) {
-    return NextResponse.json({ status: 400, error: "Invalid subscription" });
+    return NextResponse.json({ error: "Invalid subscription", status: 400 });
   }
 
   try {
@@ -28,10 +28,10 @@ export async function POST(request: NextRequest) {
       console.log("Subscription does not exist, creating new one");
       await db.insert(pushNotifications).values({
         address,
+        auth,
         endpoint,
         expirationTime,
         p256dh,
-        auth,
       });
       return NextResponse.json({ status: 200 });
     } else {
@@ -48,15 +48,15 @@ export async function POST(request: NextRequest) {
       console.log("Subscription has changed, updating");
       await db.update(pushNotifications).set({
         address,
+        auth,
         endpoint,
         expirationTime,
         p256dh,
-        auth,
       });
       return NextResponse.json({ status: 200 });
     }
   } catch (e) {
     console.log("Error while subscribing", e);
-    return NextResponse.json({ status: 500, error: "Internal server error" });
+    return NextResponse.json({ error: "Internal server error", status: 500 });
   }
 }

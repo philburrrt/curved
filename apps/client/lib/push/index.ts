@@ -10,18 +10,18 @@ export const sub = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        userVisibleOnly: true,
       });
 
       console.log("subscription", subscription);
 
       const response = await fetch("/api/push/subscribe", {
-        method: "POST",
         body: JSON.stringify(subscription),
         headers: {
           "Content-Type": "application/json",
         },
+        method: "POST",
       });
 
       if (response.status !== 200) {
