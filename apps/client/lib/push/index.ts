@@ -14,8 +14,6 @@ export const sub = async () => {
         userVisibleOnly: true,
       });
 
-      console.log("subscription", subscription);
-
       const response = await fetch("/api/push/subscribe", {
         body: JSON.stringify(subscription),
         headers: {
@@ -27,9 +25,6 @@ export const sub = async () => {
       if (response.status !== 200) {
         throw new Error("Failed to subscribe to push notifications");
       }
-
-      const data = await response.json();
-      console.log("user subscribed", data);
     } catch (err) {
       console.log("failed to subscribe to push notifications", err);
     }
@@ -48,6 +43,4 @@ export const listenToChanges = async () => {
       });
     }
   };
-
-  console.log("permissions", permissions);
 };
