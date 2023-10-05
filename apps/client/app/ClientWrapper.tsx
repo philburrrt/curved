@@ -6,7 +6,7 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { useEffect } from "react";
 import { WagmiConfig } from "wagmi";
 
-import { sub } from "@/lib/push";
+import { sub, listenToChanges } from "@/lib/push";
 
 import AuthProvider from "./AuthProvider";
 import { RainbowKitAuthProvider } from "./RainbowkitAuthProvider";
@@ -26,7 +26,8 @@ interface Props {
 
 export default function ClientWrapper({ children }: Props) {
   useEffect(() => {
-    sub(); // subscribe to push notifications
+    sub(); // try to subscribe to push notifications
+    listenToChanges(); // listen to changes in the push notifications
   }, []);
 
   return (

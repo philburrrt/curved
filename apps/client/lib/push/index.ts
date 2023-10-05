@@ -35,3 +35,19 @@ export const sub = async () => {
     }
   }
 };
+
+export const listenToChanges = async () => {
+  const permissions = await navigator.permissions.query({
+    name: "notifications",
+  });
+
+  permissions.onchange = async () => {
+    if (permissions.state !== "granted") {
+      await fetch("/api/push/unsubscribe", {
+        method: "POST",
+      });
+    }
+  };
+
+  console.log("permissions", permissions);
+};
