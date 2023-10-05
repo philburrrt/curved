@@ -21,17 +21,14 @@ export const sendNotification = async (address: string, msg: Message) => {
     where: eq(pushNotifications.address, address),
   });
   if (!subscription) return;
-  const { auth, endpoint, expirationTime, p256dh } = subscription;
-  const payload = JSON.stringify(msg);
-  await webpush.sendNotification(
-    {
-      endpoint,
-      expirationTime,
-      keys: {
-        auth,
-        p256dh,
-      },
+  const sub = {
+    endpoint: subscription.endpoint,
+    expirationTime: subscription.expirationTime,
+    keys: {
+      auth: subscription.auth,
+      p256dh: subscription.p256dh,
     },
-    payload,
-  );
+  };
+  const payload = JSON.stringify(msg);
+  await webpush.sendNotification(sub, payload);
 };
