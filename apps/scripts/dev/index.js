@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { ethers } from "ethers";
 import { FARM_ABI } from "../abi/farm.js";
+import { CURVED_ABI } from "../abi/CurvedAbi.js";
 import assert from "assert";
 import { getReason } from "../utils.js";
 
@@ -32,6 +33,56 @@ const testCreateShares = async () => {
     console.log(getReason(e.message));
     process.exit(1);
   }
+};
+
+const proposeFeeChange = async (newFeePercen, proposalString) => {
+  // curved.setProtocolFeePercent(_royaltyFeePercent)
+  const curved = new ethers.Contract(LOCAL_CURVE_ADDRESS, CURVED_ABI, wallet);
+  const setFeeCalldata = curved.interface.encodeFunctionData(
+    "setProtocolFeePercent",
+    newFeePercen,
+  );
+
+  await governor.propose(
+    [LOCAL_CURVE_ADDRESS],
+    [0],
+    [setFeeCalldata],
+    proposalString,
+  );
+};
+
+const testGovernance = async () => {
+  /** 
+  const tokenAddress = ...;
+  const token = await ethers.getContractAt(‘ERC20’, tokenAddress);
+
+  const teamAddress = ...;
+  const grantAmount = ...;
+  const transferCalldata = token.interface.encodeFunctionData(‘transfer’, [teamAddress, grantAmount]);
+
+  await governor.propose(
+    [tokenAddress],
+    [0],
+    [transferCalldata],
+    “Proposal #1: Give grant to team”,
+  );
+
+  const descriptionHash = ethers.utils.id(“Proposal #1: Give grant to team”);
+
+  await governor.queue(
+    [tokenAddress],
+    [0],
+    [transferCalldata],
+    descriptionHash,
+  );
+
+  await governor.execute(
+    [tokenAddress],
+    [0],
+    [transferCalldata],
+    descriptionHash,
+  );
+  */
 };
 
 (async () => {

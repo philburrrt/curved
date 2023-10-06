@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "_deploy": "cd contracts && forge create --rpc-url $RPC_URL --private-key $LOCAL_PRIVATE_KEY src/Curved.sol:Curved",
+    "_deployScript": "cd contracts && forge script script/Deploy.s.sol:Deploy --rpc-url $RPC_URL --broadcast",
     "anvil": "cd contracts && anvil --block-time 1 --chain-id 9999",
     "build": "cd contracts && forge build",
     "db": "node db/index.js",

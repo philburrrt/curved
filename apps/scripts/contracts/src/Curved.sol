@@ -2,9 +2,12 @@
 pragma solidity ^0.8.13;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC20Votes} from"@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Curved is Ownable, ERC20 {
+contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
     // ====== Market Variables ======
     address public protocolFeeDestination;
     // 0.05 ether = 5%
@@ -71,7 +74,7 @@ contract Curved is Ownable, ERC20 {
 
     mapping(uint256 => Share) public shareInfo;
 
-    constructor() ERC20("Curved", "CURVED") {
+    constructor() ERC20("Curved", "CURVED") ERC20Permit("Curved") {
         protocolFeeDestination = msg.sender;
         protocolFeePercent = 0.05 ether;
         royaltyFeePercent = 0.05 ether;
@@ -81,6 +84,35 @@ contract Curved is Ownable, ERC20 {
         rewardsToken = IERC20(address(this));
         _mint(msg.sender, 2_000_000_000 ether);
     }
+
+    /** overrides **/
+    
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
+        super._afterTokenTransfer(from, to, amount);
+    }
+
+    function _mint(address to, uint256 amount) internal override(ERC20, ERC20Votes) {
+        if(delegates(to) == address(0)) {
+            _delegate(to, to);
+        }
+        super._mint(to, amount);
+    }
+
+    function _burn(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
+        super._burn(account, amount);
+    }
+
+    // Overrides IERC6372 functions for timestamp-based governance
+    function clock() public view override returns (uint48) {
+        return uint48(block.timestamp);
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function CLOCK_MODE() public pure override returns (string memory) {
+        return "mode=timestamp";
+    }
+
+    /***************/
 
     function setProtocolFeeDestination(
         address _protocolFeeDestination
@@ -94,7 +126,7 @@ contract Curved is Ownable, ERC20 {
         protocolFeePercent = _protocolFeePercent;
     }
 
-        function setRoyaltyFeePercent(
+    function setRoyaltyFeePercent(
         uint256 _royaltyFeePercent
     ) external onlyOwner {
         royaltyFeePercent = _royaltyFeePercent;
