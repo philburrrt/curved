@@ -20,7 +20,7 @@ export function SidebarLink({ title, activeRoutes, href, icon }: Props) {
       <Link
         href={href}
         draggable={false}
-        className={`flex h-full w-full select-none items-center justify-center rounded-xl px-4 py-2 text-xl font-bold transition active:scale-95 md:justify-start ${
+        className={`flex h-5/6 w-full select-none items-center justify-center rounded-xl px-4 py-2 text-xl font-bold transition active:scale-95 md:justify-start ${
           isActive ? "bg-slate-700 hover:bg-slate-600" : "hover:bg-slate-700 "
         }`}
       >
