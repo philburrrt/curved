@@ -255,9 +255,9 @@ export function CreatePost() {
     >
       <Dialog.Trigger
         onClick={promptFile}
-        className="flex select-none items-center justify-center space-x-2 rounded-2xl bg-white p-5 text-black shadow-dark drop-shadow transition hover:bg-slate-200 hover:shadow-lg active:scale-95 active:drop-shadow-lg md:w-full md:px-6 md:py-4"
+        className="w-full flex select-none items-center justify-center space-x-2 rounded-2xl bg-white p-5 text-black shadow-dark drop-shadow transition hover:bg-slate-200 hover:shadow-lg active:scale-95 active:drop-shadow-lg md:w-full md:px-6 md:py-4"
       >
-        <span className="text-xl">📷</span>
+        <span className="text-xl mb-2">📷</span>
         <span className="hidden text-xl font-bold md:block">Upload</span>
       </Dialog.Trigger>
 

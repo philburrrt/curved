@@ -23,7 +23,7 @@ export function Sidebar() {
   return (
     <div className="md:fixed md:inset-0 md:mx-2">
       <div className="max-w-content fixed inset-x-0 bottom-0 z-50 md:absolute md:inset-0 md:mx-auto md:grid md:grid-cols-7 md:gap-4">
-        <ul className="relative flex space-x-1 bg-slate-800 md:col-span-2 md:block md:h-full md:space-x-0 md:space-y-1 md:p-0">
+        <ul className="relative flex space-x-1 bg-slate-800 md:col-span-2 md:block md:h-full md:space-x-0 md:space-y-1 md:p-0 pb-6">
           <div className="mt-1 hidden h-14 items-center pl-1 md:flex">
             <Link href="/" className="w-fit">
               <h2 className={`text-xl font-bold md:text-2xl ${font.className}`}>
@@ -41,7 +41,12 @@ export function Sidebar() {
 
           {status === "authenticated" && user ? (
             <>
-              <SidebarLink href="/rewards" title="Rewards" icon="🎁" />
+              <div className="hidden md:block">
+                <SidebarLink href="/rewards" title="Rewards" icon="🎁" />
+              </div>
+              <div className="block md:hidden w-full">
+                <CreatePost />
+              </div>
               <SidebarLink
                 href={`/@${user.username}`}
                 title="Profile"
@@ -58,7 +63,7 @@ export function Sidebar() {
                 <CreatePost />
               </li>
 
-              <div className="w-full md:absolute md:inset-x-0 md:bottom-4">
+              <div className="hidden md:block w-full md:absolute md:inset-x-0 md:bottom-4">
                 <SidebarButton onClick={logout} title="Logout" icon="🚪" />
               </div>
             </>
