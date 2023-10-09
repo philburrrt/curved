@@ -42,6 +42,7 @@ contract Deploy is Script {
 
         // transfer contract ownership to mother
         token.transferOwnership(address(tl));
+        shares.transferOwnership(address(tl));
 
         vm.stopBroadcast();
     }
