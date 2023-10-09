@@ -1,13 +1,29 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import {ERC20Votes} from"@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function transfer(address to, uint256 amount) external returns (bool);
+
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+
+    function mint(address to, uint256 amount) external;
+}
+
+contract Curved is Ownable {
     // ====== Market Variables ======
     address public protocolFeeDestination;
     // 0.05 ether = 5%
@@ -35,10 +51,6 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
     uint256 public totalVolume;
     // User address => staked amount
     mapping(address => uint256) public userVolume;
-
-    // ====== Token Variables ======
-
-    uint256 public maxSupply = 10_000_000_000 ether;
 
     // ====== Events ======
 
@@ -74,45 +86,15 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
 
     mapping(uint256 => Share) public shareInfo;
 
-    constructor() ERC20("Curved", "CURVED") ERC20Permit("Curved") {
+    constructor(address tk) {
         protocolFeeDestination = msg.sender;
         protocolFeePercent = 0.05 ether;
         royaltyFeePercent = 0.05 ether;
         startTime = block.timestamp;
         updatedAt = startTime;
         finishAt = startTime + 313 weeks;
-        rewardsToken = IERC20(address(this));
-        _mint(msg.sender, 2_000_000_000 ether);
+        rewardsToken = IERC20(tk);
     }
-
-    /** overrides **/
-    
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
-        super._afterTokenTransfer(from, to, amount);
-    }
-
-    function _mint(address to, uint256 amount) internal override(ERC20, ERC20Votes) {
-        if(delegates(to) == address(0)) {
-            _delegate(to, to);
-        }
-        super._mint(to, amount);
-    }
-
-    function _burn(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
-        super._burn(account, amount);
-    }
-
-    // Overrides IERC6372 functions for timestamp-based governance
-    function clock() public view override returns (uint48) {
-        return uint48(block.timestamp);
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function CLOCK_MODE() public pure override returns (string memory) {
-        return "mode=timestamp";
-    }
-
-    /***************/
 
     function setProtocolFeeDestination(
         address _protocolFeeDestination
@@ -166,7 +148,7 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
             "Only the shares subject can buy the first share"
         );
         uint256 price = getPrice(supply, amount);
-        userVolume [msg.sender] += price;
+        userVolume[msg.sender] += price;
         totalVolume += price;
         uint256 protocolFee = (price * protocolFeePercent) / 1 ether;
         uint256 royaltyFee = (price * royaltyFeePercent) / 1 ether;
@@ -192,7 +174,7 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
             "Cannot sell all shares, must leave at least one"
         );
         uint256 owed = getPrice(supply - amount, amount);
-        userVolume [msg.sender] += owed;
+        userVolume[msg.sender] += owed;
         totalVolume += owed;
         uint256 protocolFee = (owed * protocolFeePercent) / 1 ether;
         uint256 royaltyFee = (owed * royaltyFeePercent) / 1 ether;
@@ -250,11 +232,11 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
         return rate;
     }
 
-    function lastTimeRewardApplicable() public view returns (uint) {
+    function lastTimeRewardApplicable() public view returns (uint256) {
         return _min(finishAt, block.timestamp);
     }
 
-    function rewardPerToken() public view returns (uint) {
+    function rewardPerToken() public view returns (uint256) {
         if (totalVolume == 0) {
             return rewardPerEthStored;
         }
@@ -267,27 +249,26 @@ contract Curved is Ownable, ERC20, ERC20Permit, ERC20Votes {
             totalVolume;
     }
 
-    function earned(address _account) public view returns (uint) {
+    function earned(address _account) public view returns (uint256) {
       if (userVolume[_account] < 0){
         return 0;
       }
 
       return
-          ((uint(userVolume[_account]) *
+          ((uint256(userVolume[_account]) *
               (rewardPerToken() - userRewardPerEthPaid[_account])) / 1e18) +
           rewards[_account];
     }
 
     function getReward() public updateReward(msg.sender) {
-        uint reward = rewards[msg.sender];
-        require(reward + totalSupply() <= maxSupply, "Max supply reached");
+        uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            _mint(msg.sender, reward);
+            rewardsToken.mint(msg.sender, reward);
         }
     }
 
-    function _min(uint x, uint y) private pure returns (uint) {
+    function _min(uint256 x, uint256 y) private pure returns (uint256) {
         return x <= y ? x : y;
     }
 

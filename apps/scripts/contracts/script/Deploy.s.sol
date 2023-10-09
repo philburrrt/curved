@@ -8,6 +8,7 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 import {Curved} from "../src/Curved.sol";
 import {YuYuMother} from "../src/Governance.sol";
+import {YuYu} from "../src/Token.sol";
 
 contract Deploy is Script {
     function setUp() public {}
@@ -20,13 +21,16 @@ contract Deploy is Script {
         address[] memory proposers;
 
         address[] memory executors = new address[](1);
-        executors[0] = 0x0000000000000000000000000000000000000000; 
-        // we set the zero address as executor so that anyone can call it. 
+        executors[0] = 0x0000000000000000000000000000000000000000;
+        // we set the zero address as executor so that anyone can call it.
         // maybe its better for the Gov to be sole executor? and then anyone can call it from there.
 
         TimelockController tl = new TimelockController(4 hours, proposers, executors, deployer);
 
-        Curved token = new Curved();
+        YuYu token = new YuYu();
+        Curved shares = new Curved(address(token));
+
+        token.addMinter(address(shares));
 
         YuYuMother gov = new YuYuMother(IVotes(token), tl);
 

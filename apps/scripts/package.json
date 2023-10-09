@@ -10,7 +10,7 @@
     "build": "cd contracts && forge build",
     "db": "node db/index.js",
     "debug-indexer": "pnpm run env -- node dev/debugIndexer.js",
-    "deploy": "pnpm run env -- pnpm run _deploy",
+    "deploy": "pnpm run env -- pnpm run _deployScript",
     "env": "dotenv -e ../../.env",
     "init-rewards": "node dev/initRewards.js",
     "mock-events": "pnpm run env -- node dev/mockEvents.js",

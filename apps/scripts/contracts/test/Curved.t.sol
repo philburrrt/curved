@@ -2,8 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {Curved} from "../src/Curved.sol";
+
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {Curved} from "../src/Curved.sol";
+import {YuYu} from "../src/Token.sol";
+
 
 contract CurvedTest is Test {
     IERC20 _rewardToken;
@@ -59,9 +63,15 @@ contract CurvedTest is Test {
         for (uint i = 0; i < _users.length; i++) {
             vm.deal(_users[i], 100 ether);
         }
-        _curved = new Curved();
+
+        YuYu _tk = new YuYu();
+        _rewardToken = IERC20(address(_tk));
+
+        _curved = new Curved(address(_rewardToken));
         _curvedAddress = address(_curved);
-        _rewardToken = IERC20(_curvedAddress);
+
+        _tk.addMinter(_curvedAddress);
+        
         uint256 _ownerRewardTokenBalance = _rewardToken.balanceOf(_owner);
         assertEq(_ownerRewardTokenBalance, 2_000_000_000 ether);
         vm.stopPrank();

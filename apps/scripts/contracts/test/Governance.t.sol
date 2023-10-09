@@ -13,6 +13,8 @@ import {GovernorCompatibilityBravo} from
 import {Curved} from "../src/Curved.sol";
 import {YuYuMother} from "../src/Governance.sol";
 
+import {YuYu} from "../src/Token.sol";
+
 contract YuyuMotherTest is Test {
     enum VoteType {
         Against,
@@ -25,6 +27,7 @@ contract YuyuMotherTest is Test {
 
     TimelockController _tl;
     YuYuMother _gov;
+    YuYu _tk;
 
     address _curvedAddress;
     address _owner = address(0x11);
@@ -35,9 +38,12 @@ contract YuyuMotherTest is Test {
     function setUp() public {
         vm.startPrank(_owner);
 
-        _curved = new Curved();
+        _tk = new YuYu();
+        _rewardToken = IERC20(address(_tk));
+
+        _curved = new Curved(address(_rewardToken));
         _curvedAddress = address(_curved);
-        _rewardToken = IERC20(_curvedAddress);
+
         uint256 _ownerRewardTokenBalance = _rewardToken.balanceOf(_owner);
         assertEq(_ownerRewardTokenBalance, 2_000_000_000 ether);
 
@@ -53,7 +59,7 @@ contract YuyuMotherTest is Test {
         // executors[0] = 0x0000000000000000000000000000000000000000;
 
         _tl = new TimelockController(4 hours, proposers, executors, _owner);
-        _gov = new YuYuMother(IVotes(_curved), _tl);
+        _gov = new YuYuMother(IVotes(_tk), _tl);
 
         // grant PROPOSER_ROLE to yuyu mother
         _tl.grantRole(_tl.PROPOSER_ROLE(), address(_gov));
@@ -71,7 +77,7 @@ contract YuyuMotherTest is Test {
     modifier delegation() {
         for (uint256 i = 0; i < _users.length; i++) {
             vm.prank(_users[i]);
-            _curved.delegate(_users[i]);
+            _tk.delegate(_users[i]);
         }
         _;
     }
