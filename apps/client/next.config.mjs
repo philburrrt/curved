@@ -10,7 +10,7 @@ async function defineNextConfig(config) {
 
   const withPWA = withPWAInit({
     dest: "public",
-    disable: process.env.NODE_ENV === "development",
+    // disable: process.env.NODE_ENV === "development",
   });
   plugins.push(withPWA);
 
