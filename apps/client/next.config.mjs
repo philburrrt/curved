@@ -10,12 +10,12 @@ import { env } from "./lib/env.mjs";
 async function defineNextConfig(config) {
   const plugins = [];
 
-  if (env.NEXT_PUBLIC_NODE_ENV !== "development") {
-    const withPWA = withPWAInit({
-      dest: "public",
-    });
-    plugins.push(withPWA);
-  }
+  // if (env.NEXT_PUBLIC_NODE_ENV !== "development") {
+  const withPWA = withPWAInit({
+    dest: "public",
+  });
+  plugins.push(withPWA);
+  // }
 
   return plugins.reduce((acc, plugin) => plugin(acc), config);
 }
