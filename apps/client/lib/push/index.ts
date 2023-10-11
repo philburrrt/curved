@@ -1,38 +1,34 @@
 "use client";
 export const sub = async () => {
   if ("serviceWorker" in navigator) {
-    const registration = await navigator.serviceWorker.register("/sw.js");
-
-    registration.onupdatefound = () => {
-      const installingWorker = registration.installing;
-
-      if (installingWorker == null) {
-        return;
-      }
-
-      installingWorker.onstatechange = () => {
-        if (installingWorker.state === "installed") {
-          if (navigator.serviceWorker.controller) {
-            console.log("New content is available; please refresh.");
-          } else {
-            console.log("Content is cached for offline use.");
-          }
-        }
-      };
-    };
+    if (!navigator.serviceWorker.controller) {
+      await navigator.serviceWorker.register("/sw.js");
+    } else {
+      console.log("Service worker already registered");
+    }
   }
 
-  const permissionResult = await Notification.requestPermission();
-
-  if (permissionResult === "granted") {
+  let subscription;
+  if (Notification.permission !== "granted") {
     try {
+      const permissionResult = await Notification.requestPermission();
+      if (permissionResult !== "granted") {
+        throw new Error("Permission not granted for Notification");
+      }
+
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
+      subscription = await registration.pushManager.subscribe({
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
         userVisibleOnly: true,
       });
+    } catch (error) {
+      console.log(error);
+      return;
+    }
 
-      const response = await fetch("/api/push/subscribe", {
+    let response;
+    try {
+      response = await fetch("/api/push/subscribe", {
         body: JSON.stringify(subscription),
         headers: {
           "Content-Type": "application/json",
@@ -43,8 +39,8 @@ export const sub = async () => {
       if (response.status !== 200) {
         throw new Error("Failed to subscribe to push notifications");
       }
-    } catch (err) {
-      console.log("failed to subscribe to push notifications", err);
+    } catch (error) {
+      console.log(error);
     }
   }
 };
