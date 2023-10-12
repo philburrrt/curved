@@ -64,8 +64,8 @@ export const listenToChanges = async () => {
     if (permissions.state !== "granted") {
       const deviceId = localStorage.getItem("device_id");
       await fetch("/api/push/unsubscribe", {
-        method: "POST",
         body: JSON.stringify({ deviceId }),
+        method: "POST",
       });
     }
   };

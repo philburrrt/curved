@@ -1,5 +1,6 @@
 import withPWAInit from "@ducanh2912/next-pwa";
 
+import { env } from "./lib/env.mjs";
 
 /**
  * @template {import('next').NextConfig} T
@@ -9,12 +10,12 @@ import withPWAInit from "@ducanh2912/next-pwa";
 async function defineNextConfig(config) {
   const plugins = [];
 
-  // if (env.NEXT_PUBLIC_NODE_ENV !== "development") {
-  const withPWA = withPWAInit({
-    dest: "public",
-  });
-  plugins.push(withPWA);
-  // }
+  if (env.NEXT_PUBLIC_NODE_ENV !== "development") {
+    const withPWA = withPWAInit({
+      dest: "public",
+    });
+    plugins.push(withPWA);
+  }
 
   return plugins.reduce((acc, plugin) => plugin(acc), config);
 }

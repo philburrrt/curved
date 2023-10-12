@@ -30,10 +30,10 @@ export async function POST(request: NextRequest) {
       await db.insert(pushNotifications).values({
         address,
         auth,
+        deviceId,
         endpoint,
         expirationTime,
         p256dh,
-        deviceId,
       });
       return NextResponse.json({ status: 200 });
     } else {
