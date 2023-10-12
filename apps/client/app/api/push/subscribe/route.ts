@@ -9,7 +9,8 @@ export async function POST(request: NextRequest) {
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const subscription = await request.json();
+  const msg = await request.json();
+  const { subscription, deviceId } = msg;
 
   const { endpoint, expirationTime, keys } = subscription;
   const { p256dh, auth } = keys;
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
         endpoint,
         expirationTime,
         p256dh,
+        deviceId,
       });
       return NextResponse.json({ status: 200 });
     } else {

@@ -19,18 +19,21 @@ interface Message {
 }
 
 export const sendNotification = async (address: string, msg: Message) => {
-  const subscription = await db.query.pushNotifications.findFirst({
+  const subscription = await db.query.pushNotifications.findMany({
     where: eq(pushNotifications.address, address),
   });
-  if (!subscription) return;
-  const sub = {
-    endpoint: subscription.endpoint,
-    expirationTime: subscription.expirationTime,
-    keys: {
-      auth: subscription.auth,
-      p256dh: subscription.p256dh,
-    },
-  };
-  const payload = JSON.stringify(msg);
-  await webpush.sendNotification(sub, payload);
+  if (!subscription || subscription.length === 0) return;
+  for (const sub of subscription) {
+    const entry = {
+      endpoint: sub.endpoint,
+      expirationTime: sub.expirationTime,
+      keys: {
+        auth: sub.auth,
+        p256dh: sub.p256dh,
+      },
+    };
+    const payload = JSON.stringify(msg);
+    console.log(`sending notification to ${subscription.length} devices`);
+    await webpush.sendNotification(entry, payload);
+  }
 };

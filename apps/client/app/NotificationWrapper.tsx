@@ -1,8 +1,10 @@
 "use client";
-import { useAuth } from "./AuthProvider";
 import { useEffect } from "react";
-import { listenToChanges, sub } from "@/lib/push";
 import { useState } from "react";
+
+import { listenToChanges, sub } from "@/lib/push";
+
+import { useAuth } from "./AuthProvider";
 
 interface Props {
   children: React.ReactNode;

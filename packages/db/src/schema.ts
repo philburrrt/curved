@@ -271,6 +271,7 @@ export const pushNotifications = mysqlTable(
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    deviceId: varchar("device_id", { length: PUBLIC_ID_LENGTH }).notNull(),
     endpoint: varchar("endpoint", { length: 255 }).notNull(),
     expirationTime: datetime("expiration_time"),
     id: serial("id").primaryKey(),
@@ -281,7 +282,7 @@ export const pushNotifications = mysqlTable(
       .notNull(),
   },
   (table) => ({
-    uniqueIndex: uniqueIndex("address").on(table.address),
+    uniqueIndex: uniqueIndex("deviceId").on(table.deviceId),
   }),
 );
 

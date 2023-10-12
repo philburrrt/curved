@@ -1,4 +1,6 @@
 "use client";
+import { nanoidLowercase } from "../db/nanoid";
+
 export const sub = async () => {
   if ("serviceWorker" in navigator) {
     if (!navigator.serviceWorker.controller) {
@@ -10,6 +12,9 @@ export const sub = async () => {
 
   let subscription;
   if (Notification.permission !== "granted") {
+    if (!localStorage.getItem("device_id")) {
+      localStorage.setItem("device_id", nanoidLowercase());
+    }
     try {
       const permissionResult = await Notification.requestPermission();
       if (permissionResult !== "granted") {
@@ -26,10 +31,15 @@ export const sub = async () => {
       return;
     }
 
+    const msg = {
+      deviceId: localStorage.getItem("device_id"),
+      subscription,
+    };
+
     let response;
     try {
       response = await fetch("/api/push/subscribe", {
-        body: JSON.stringify(subscription),
+        body: JSON.stringify(msg),
         headers: {
           "Content-Type": "application/json",
         },
@@ -52,8 +62,10 @@ export const listenToChanges = async () => {
 
   permissions.onchange = async () => {
     if (permissions.state !== "granted") {
+      const deviceId = localStorage.getItem("device_id");
       await fetch("/api/push/unsubscribe", {
         method: "POST",
+        body: JSON.stringify({ deviceId }),
       });
     }
   };

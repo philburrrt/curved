@@ -1,6 +1,5 @@
 import withPWAInit from "@ducanh2912/next-pwa";
 
-import { env } from "./lib/env.mjs";
 
 /**
  * @template {import('next').NextConfig} T
@@ -28,7 +27,7 @@ export default defineNextConfig({
     serverActions: true,
   },
   images: {
-    domains: ["pub-d165b348e0754b599a9a2ce9b759e149.r2.dev"],
     dangerouslyAllowSVG: true,
+    domains: ["pub-d165b348e0754b599a9a2ce9b759e149.r2.dev"],
   },
 });

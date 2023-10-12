@@ -4,9 +4,9 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
-import { NotificationWrapper } from "./NotificationWrapper";
 
 import AuthProvider from "./AuthProvider";
+import { NotificationWrapper } from "./NotificationWrapper";
 import { RainbowKitAuthProvider } from "./RainbowkitAuthProvider";
 import { chains, config } from "./wagmi";
 
