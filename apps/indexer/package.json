@@ -19,7 +19,8 @@
     "ethers": "^5.7.1",
     "mysql2": "^3.6.1",
     "nanoid": "^5.0.1",
-    "p-queue": "^7.4.1"
+    "p-queue": "^7.4.1",
+    "web-push": "^3.6.6"
   },
   "devDependencies": {
     "@types/node": "^20.6.3",

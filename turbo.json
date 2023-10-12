@@ -38,7 +38,10 @@
         "WS_URL",
         "REVALIDATE_SECRET",
         "DEPLOYED_URL",
-        "CONTRACT_ADDRESS"
+        "CONTRACT_ADDRESS",
+        "VAPID_EMAIL",
+        "VAPID_PRIVATE_KEY",
+        "NEXT_PUBLIC_VAPID_PUBLIC_KEY"
       ]
     },
     "start": {
