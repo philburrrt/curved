@@ -3,11 +3,8 @@
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { useEffect } from "react";
 import { WagmiConfig } from "wagmi";
-import { useAccount } from "wagmi";
-
-import { listenToChanges, sub } from "@/lib/push";
+import { NotificationWrapper } from "./NotificationWrapper";
 
 import AuthProvider from "./AuthProvider";
 import { RainbowKitAuthProvider } from "./RainbowkitAuthProvider";
@@ -38,13 +35,3 @@ export default function ClientWrapper({ children }: Props) {
     </WagmiConfig>
   );
 }
-
-const NotificationWrapper = ({ children }: Props) => {
-  const { address } = useAccount();
-  useEffect(() => {
-    if (!address) return;
-    sub();
-    listenToChanges();
-  }, [address]);
-  return <>{children}</>;
-};
