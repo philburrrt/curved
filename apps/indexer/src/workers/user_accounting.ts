@@ -6,7 +6,7 @@ import PQueue from "p-queue";
 import { parentPort } from "worker_threads";
 
 import { db } from "../DB";
-import { sendNotification, Message } from "../sendNotification";
+import { Message,sendNotification } from "../sendNotification";
 
 if (!parentPort) {
   throw new Error("No parentPort");

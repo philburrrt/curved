@@ -1,6 +1,6 @@
-import webpush from "web-push";
 import { pushNotifications } from "db";
 import { eq } from "drizzle-orm";
+import webpush from "web-push";
 
 import { db } from "./DB";
 
