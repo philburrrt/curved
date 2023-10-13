@@ -4,9 +4,9 @@ import { and, eq } from "drizzle-orm";
 import { utils } from "ethers";
 import PQueue from "p-queue";
 import { parentPort } from "worker_threads";
-import { sendNotification, Message } from "../sendNotification";
 
 import { db } from "../DB";
+import { sendNotification, Message } from "../sendNotification";
 
 if (!parentPort) {
   throw new Error("No parentPort");
@@ -42,8 +42,8 @@ const handleMessage = async (event: any) => {
 
     if (side === "0") {
       const owner = event.args[3].toLowerCase();
-      const price = utils.formatUnits(event.args[5]);
-      handleNotification({ amount, owner, price, shareId, trader });
+      const price = formatUnits(event.args[5]);
+      handleNotification({ owner, price, shareId, trader });
     }
 
     const trade = {
@@ -116,7 +116,7 @@ const handleMessage = async (event: any) => {
 };
 
 const handleNotification = async (event: any) => {
-  const { shareId, trader, amount, owner, price } = event;
+  const { shareId, trader, owner, price } = event;
   const postId = await db
     .select({
       postId: nftPost.postId,
@@ -125,11 +125,8 @@ const handleNotification = async (event: any) => {
     .where(eq(nftPost.shareId, shareId));
 
   const msg: Message = {
-    body: `${trader.slice(
-      0,
-      6,
-    )} purchased ${amount} shares of your post for ${price} ETH`,
-    title: `Someone purchased your share!`,
+    body: `${trader.slice(0, 6)} purchased your post for ${price} ETH`,
+    title: `Someone purchased your post!`,
     url: `https://yuyu.social/post/${postId}`,
   };
 
