@@ -2,8 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "module": "commonjs"
+    "rootDir": "src"
   },
   "extends": "tsconfig/base.json",
   "include": ["src", "src/abi/*.json"]

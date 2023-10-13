@@ -170,6 +170,9 @@ importers:
       '@types/node':
         specifier: ^20.6.3
         version: 20.6.3
+      '@types/web-push':
+        specifier: ^3.6.1
+        version: 3.6.1
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -4190,6 +4193,12 @@ packages:
   /@types/trusted-types@2.0.4:
     resolution: {integrity: sha512-IDaobHimLQhjwsQ/NMwRVfa/yL7L/wriQPMhw1ZJall0KX6E1oxk29XMDeilW5qTIg5aoiqf5Udy8U/51aNoQQ==}
     dev: false
+
+  /@types/web-push@3.6.1:
+    resolution: {integrity: sha512-Zu6Iju7c4IlE8I8eEeFLYRb7XFqvHFmWWAYr1cmug9EX3c6CDarxIXWN/GO0sxjbJLkHPwozUzp6cLdXsrq7Ew==}
+    dependencies:
+      '@types/node': 20.6.3
+    dev: true
 
   /@types/ws@7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}

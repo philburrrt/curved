@@ -1,8 +1,16 @@
-const webpush = require("web-push");
+import webpush from "web-push";
 import { pushNotifications } from "db";
 import { eq } from "drizzle-orm";
 
 import { db } from "./DB";
+
+if (
+  !process.env.VAPID_EMAIL ||
+  !process.env.VAPID_PRIVATE_KEY ||
+  !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+) {
+  throw new Error("Missing VAPID keys");
+}
 
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL,
