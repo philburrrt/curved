@@ -18,7 +18,8 @@
     "test": "cd contracts && forge test -vvv",
     "test:curved:watch": "cd contracts && forge test --match-contract CurvedTest --watch",
     "test:fuzz": "forge test --match-contract FuzzyTest -vv",
-    "test:watch": "cd contracts && forge test -vvv --watch --run-all"
+    "test:watch": "cd contracts && forge test -vvv --watch --run-all",
+    "test:vest:watch": "cd contracts && forge test -vvv --match-contract VestingTest --watch"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
