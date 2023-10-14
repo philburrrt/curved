@@ -6,12 +6,12 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 
-import { CURVED_ABI } from "@/lib/abi/curved";
+import { SHARES_ABI } from "@/lib/abi/shares";
 import { env } from "@/lib/env.mjs";
 
 const contract = {
-  abi: CURVED_ABI,
-  address: env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+  abi: SHARES_ABI,
+  address: env.NEXT_PUBLIC_SHARES_ADDRESS as `0x${string}`,
 };
 
 export const useRewards = (address: `0x${string}` | undefined) => {

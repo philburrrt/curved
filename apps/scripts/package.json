@@ -10,6 +10,7 @@
     "db": "node db/index.js",
     "debug-indexer": "pnpm run env -- node dev/debugIndexer.js",
     "deploy": "pnpm run env -- pnpm run _deployScript",
+    "deploy:js": "pnpm run env -- node deploy.js",
     "env": "dotenv -e ../../.env",
     "forge:build": "cd contracts && forge build",
     "init-rewards": "node dev/initRewards.js",

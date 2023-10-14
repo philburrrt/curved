@@ -17,7 +17,7 @@ import {
 import { DialogContent } from "@/components/Dialog";
 import { PostTopBar } from "@/components/PostTopBar";
 import { SubmitButton } from "@/components/SubmitButton";
-import { CURVED_ABI } from "@/lib/abi/curved";
+import { SHARES_ABI } from "@/lib/abi/shares";
 import { env } from "@/lib/env.mjs";
 
 import { useAuth } from "../AuthProvider";
@@ -43,9 +43,9 @@ export function CreatePost() {
     error: errorPrepare,
     isLoading: isLoadingPrepare,
   } = usePrepareContractWrite({
-    abi: CURVED_ABI,
+    abi: SHARES_ABI,
     account: address,
-    address: env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+    address: env.NEXT_PUBLIC_SHARES_ADDRESS as `0x${string}`,
     args: [url],
     enabled: Boolean(address),
     functionName: "createShare",

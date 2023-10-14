@@ -5,8 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "pnpm run env -- pnpm build:abi && tsc",
-    "build:abi": "cp ../scripts/contracts/out/Curved.sol/Curved.json ./src/abi/Curved.json",
+    "build": "pnpm run env -- pnpm build:sharesAbi && pnpm build:tokenAbi && tsc",
+    "build:sharesAbi": "cp ../scripts/contracts/out/Curved.sol/Curved.json ./src/abi/Shares.json",
+    "build:tokenAbi": "cp ../scripts/contracts/out/Token.sol/YuYu.json ./src/abi/Token.json",
     "dev": "sleep 5 && nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\"",
     "env": "dotenv -e ../../.env",
     "lint": "cd ../.. && eslint --fix \"apps/indexer/**/*.{ts,tsx,cjs,mjs}\" --ignore-path .gitignore",

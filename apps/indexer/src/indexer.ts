@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
 import { Worker } from "worker_threads";
 
-import CurveABI from "./abi/Curved.json" assert { type: "json" };
+import SharesABI from "./abi/Shares.json" assert { type: "json" };
 import { db } from "./DB";
 import { nanoidLowercase } from "./nanoid";
-const { WS_URL, CONTRACT_ADDRESS } = process.env;
+const { WS_URL, SHARES_ADDRESS } = process.env;
 
 config();
 
@@ -26,11 +26,11 @@ export class Indexer {
     );
     this.provider = new ethers.providers.WebSocketProvider(WS_URL ?? "");
     this.curve = new ethers.Contract(
-      CONTRACT_ADDRESS ?? "",
-      CurveABI.abi,
+      SHARES_ADDRESS ?? "",
+      SharesABI.abi,
       this.provider,
     );
-    console.log(`Indexer listening to ${CONTRACT_ADDRESS} on ${WS_URL}...`);
+    console.log(`Indexer listening to ${SHARES_ADDRESS} on ${WS_URL}...`);
     this.start();
   }
 

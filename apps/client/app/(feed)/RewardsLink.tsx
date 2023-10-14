@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useContractRead } from "wagmi";
 
-import { CURVED_ABI } from "@/lib/abi/curved";
+import { SHARES_ABI } from "@/lib/abi/shares";
 import { env } from "@/lib/env.mjs";
 import { formatUnits } from "@/lib/utils";
 import Logo from "@/public/images/favicon-16x16.png";
@@ -15,8 +15,8 @@ export function RewardsLink() {
   const { user } = useAuth();
 
   const { data: earned } = useContractRead({
-    abi: CURVED_ABI,
-    address: env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+    abi: SHARES_ABI,
+    address: env.NEXT_PUBLIC_SHARES_ADDRESS as `0x${string}`,
     args: user ? [user.address] : undefined,
     enabled: Boolean(user),
     functionName: "earned",
