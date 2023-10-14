@@ -19,6 +19,6 @@ export const NotificationWrapper = ({ children }: Props) => {
     setAsked(true);
     sub();
     listenToChanges();
-  }, [status]);
+  }, [status, asked]);
   return <>{children}</>;
 };
