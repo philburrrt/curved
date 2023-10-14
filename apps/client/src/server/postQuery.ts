@@ -85,9 +85,7 @@ export function formatPostQuery(data: PostQueryResponse): Post[] {
 export function formatPostQueryRow(row: PostQueryRow): Post | null {
   switch (row.type) {
     case "post": {
-      if (row.nftShareId === 0) {
-        // TODO: Remove this once we have a better way to handle this
-      } else if (!row.nftShareId || !row.nftUrl) {
+      if (!row.nftShareId || !row.nftUrl) {
         console.error("Invalid post", row);
         return null;
       }
