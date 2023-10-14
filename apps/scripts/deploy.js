@@ -54,11 +54,6 @@ const deployVestingWallet = async () => {
 };
 
 const deployShares = async (tokenAddr) => {
-  /*
-      constructor(
-      address token
-    )
-  */
   const factory = new ethers.ContractFactory(sAbi, sBytecode, wallet);
   const contract = await factory.deploy(tokenAddr);
   await contract.deployed();
@@ -66,10 +61,18 @@ const deployShares = async (tokenAddr) => {
   return contract.address;
 };
 
+const initMinter = async (sharesAddr, tokenAddr) => {
+  const contract = new ethers.Contract(tokenAddr, tAbi, wallet);
+  const tx = await contract.addMinter(sharesAddr);
+  await tx.wait();
+  console.log("Minter added to token");
+};
+
 const main = async () => {
   const tokenAddress = await deployToken();
-  const vestingAddress = await deployVestingWallet();
+  await deployVestingWallet();
   const sharesAddress = await deployShares(tokenAddress);
+  await initMinter(sharesAddress, tokenAddress);
 };
 
 main();
