@@ -11,7 +11,8 @@
     "dev": "sleep 5 && nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\"",
     "env": "dotenv -e ../../.env",
     "lint": "cd ../.. && eslint --fix \"apps/indexer/**/*.{ts,tsx,cjs,mjs}\" --ignore-path .gitignore",
-    "start": "pnpm run env -- node --experimental-specifier-resolution=node ./dist/index.js"
+    "start": "pnpm run env -- node --experimental-specifier-resolution=node ./dist/index.js",
+    "test": "nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\""
   },
   "dependencies": {
     "@planetscale/database": "^1.11.0",

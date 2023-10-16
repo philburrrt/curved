@@ -1,6 +1,6 @@
 import { nftPost, pendingPost, post, trade } from "db";
 import { config } from "dotenv";
-import { eq } from "drizzle-orm";
+import { eq, asc, desc } from "drizzle-orm";
 import { ethers } from "ethers";
 import { Worker } from "worker_threads";
 import { msgDiscord } from "./msgDiscord";
@@ -43,8 +43,48 @@ export class Indexer {
       this.provider,
     );
     console.log(`Indexer listening to ${SHARES_ADDRESS} on ${WS_URL}...`);
-    this.start();
   }
+
+  indexHistoricalBlocks = async () => {
+    // last indexed block number can be found via the hash of the latest trade in the db
+    const tx = await db.select().from(trade).orderBy(desc(trade.id)).limit(1);
+    const lastTrade = tx[0];
+    console.log("Last trade", lastTrade);
+    if (!lastTrade)
+      return console.log(
+        "No trades found in db. Skipping historical indexing.",
+      );
+    console.log("Last trade hash", lastTrade.hash);
+    const receipt = await this.provider.getTransaction(lastTrade.hash);
+    console.log("Last trade block number", receipt.blockNumber);
+    if (receipt.blockNumber === undefined)
+      return console.log("No new trades found.");
+    const reInitBlockNumber = receipt.blockNumber + 1;
+
+    // get all trades since last indexed block
+    //@ts-ignore
+    const tradeFilter = this.curve.filters.Trade();
+    //@ts-ignore
+    const newShareFilter = this.curve.filters.ShareCreated();
+    const tradeEvents = await this.curve.queryFilter(
+      tradeFilter,
+      reInitBlockNumber,
+    );
+    const shareEvents = await this.curve.queryFilter(
+      newShareFilter,
+      reInitBlockNumber,
+    );
+    if (tradeEvents.length === 0 && shareEvents.length === 0)
+      return console.log("No new trades found.");
+    console.log("Found", tradeEvents.length, "new trades.");
+    console.log("Found", shareEvents.length, "new shares.");
+    tradeEvents.forEach((event: any) => {
+      this.handleTrade(event);
+    });
+    shareEvents.forEach((event: any) => {
+      this.handleShareCreated(event);
+    });
+  };
 
   public start() {
     this.curve.on("*", (event) => {

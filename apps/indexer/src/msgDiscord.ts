@@ -5,11 +5,11 @@ config();
 export const msgDiscord = async (msg: string) => {
   try {
     fetch(DISCORD_WEBHOOK_URL ?? "", {
-      method: "POST",
+      body: JSON.stringify({ content: msg }),
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ content: msg }),
+      method: "POST",
     });
   } catch (e: any) {
     console.error(e);

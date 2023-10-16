@@ -3,9 +3,9 @@ import { shareData } from "db";
 import { and, eq } from "drizzle-orm";
 import PQueue from "p-queue";
 import { parentPort } from "worker_threads";
-import { msgDiscord } from "../msgDiscord";
 
 import { db } from "../DB";
+import { msgDiscord } from "../msgDiscord";
 
 if (!parentPort) {
   throw new Error("No parentPort");
