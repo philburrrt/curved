@@ -3,6 +3,7 @@ import { shareData } from "db";
 import { and, eq } from "drizzle-orm";
 import PQueue from "p-queue";
 import { parentPort } from "worker_threads";
+import { msgDiscord } from "../msgDiscord";
 
 import { db } from "../DB";
 
@@ -24,6 +25,7 @@ const handleMessage = async (event: any) => {
     });
   } catch (e) {
     console.error("error querying existing share data", e);
+    msgDiscord(`error querying existing share data for shareId ${shareId}`);
   }
 
   if (!data) {
@@ -34,6 +36,7 @@ const handleMessage = async (event: any) => {
       });
     } catch (e) {
       console.error("error inserting share data", e);
+      msgDiscord(`error inserting share data for shareId ${shareId}`);
     }
   }
 
@@ -48,6 +51,7 @@ const handleMessage = async (event: any) => {
         .where(and(eq(shareData.shareId, shareId)));
     } catch (e) {
       console.error("error updating share data", e);
+      msgDiscord(`error updating share data for shareId ${shareId}`);
     }
   }
 };

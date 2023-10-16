@@ -3,11 +3,11 @@ import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
 import { Worker } from "worker_threads";
-
+import { msgDiscord } from "./msgDiscord";
 import SharesABI from "./abi/Shares.json" assert { type: "json" };
 import { db } from "./DB";
 import { nanoidLowercase } from "./nanoid";
-const { WS_URL, SHARES_ADDRESS } = process.env;
+const { WS_URL, SHARES_ADDRESS, DISCORD_WEBHOOK_URL } = process.env;
 
 config();
 
@@ -21,9 +21,21 @@ export class Indexer {
     this.userWorker = new Worker(
       new URL("./workers/user_accounting.js", import.meta.url),
     );
+    this.userWorker.on("exit", (code) => {
+      console.log(`User worker stopped with exit code ${code}... Restarting`);
+      this.userWorker = new Worker(
+        new URL("./workers/user_accounting.js", import.meta.url),
+      );
+    });
     this.shareWorker = new Worker(
       new URL("./workers/share_accounting.js", import.meta.url),
     );
+    this.shareWorker.on("exit", (code) => {
+      console.log(`Share worker stopped with exit code ${code}... Restarting`);
+      this.shareWorker = new Worker(
+        new URL("./workers/share_accounting.js", import.meta.url),
+      );
+    });
     this.provider = new ethers.providers.WebSocketProvider(WS_URL ?? "");
     this.curve = new ethers.Contract(
       SHARES_ADDRESS ?? "",
@@ -162,8 +174,9 @@ export class Indexer {
           }),
         );
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      msgDiscord(`Error creating share: ${e.message}`);
     }
   };
 }
