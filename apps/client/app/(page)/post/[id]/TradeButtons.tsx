@@ -60,7 +60,7 @@ export function TradeButtons({ shareId }: Props) {
       <div className="flex w-full space-x-2">
         <div className="w-full space-y-1">
           <button
-            title="Buy share"
+            title="Buy post"
             disabled={disableBuy}
             onClick={() => {
               if (!disableBuy && buy) {
@@ -89,7 +89,7 @@ export function TradeButtons({ shareId }: Props) {
               </p>
             ) : doneBuying ? (
               <p className="text-center text-sm text-sky-400">
-                Successfully bought share! 🎉
+                Successfully bought post! 🎉
               </p>
             ) : null}
           </div>
@@ -98,7 +98,7 @@ export function TradeButtons({ shareId }: Props) {
         {canSell ? (
           <div className="w-full space-y-1">
             <button
-              title="Sell share"
+              title="Sell post"
               disabled={disableSell}
               onClick={() => {
                 if (!disableSell && sell) {
@@ -129,7 +129,7 @@ export function TradeButtons({ shareId }: Props) {
                 </p>
               ) : doneSelling ? (
                 <p className="text-center text-sm text-amber-400">
-                  Successfully sold share! 🎉
+                  Successfully sold post! 🎉
                 </p>
               ) : null}
             </div>

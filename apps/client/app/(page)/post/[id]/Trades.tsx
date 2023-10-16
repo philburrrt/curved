@@ -95,7 +95,7 @@ export async function Trades({ shareId }: Props) {
                 <span className="text-slate-400">{verb}</span>
                 <span className="font-bold text-white">{amount}</span>
                 <span className="text-slate-400">
-                  share{amount > 1 ? "s" : ""}
+                  post{amount > 1 ? "s" : ""}
                 </span>
               </div>
 
