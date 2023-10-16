@@ -127,7 +127,7 @@ contract Curved is Ownable {
                 (supply + amount) *
                 (2 * (supply - 1 + amount) + 1)) / 6;
         uint256 summation = sum2 - sum1;
-        return (summation * 1 ether) / 4000;
+        return (summation * 1 ether) / 1000;
     }
 
     function createShare(string calldata _uri) external {

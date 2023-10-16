@@ -30,6 +30,13 @@ const charts = [
     increment: 1,
     curve: 32000,
   },
+  {
+    title: "Custom Extra Aggro Price Curve",
+    filename: "custom-extra-aggro-price-curve",
+    supply: 100,
+    increment: 1,
+    curve: 1000,
+  },
 ];
 
 function getPrice(supply, amount, curve = DEFAULT_CURVE) {
@@ -92,6 +99,6 @@ const publishChart = (filename) => {
 };
 
 (() => {
-  const filename = charts[2].filename;
+  const filename = charts[3].filename;
   publishChart(filename);
 })();
