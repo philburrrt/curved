@@ -34,26 +34,6 @@ export default function RootLayout({ children }: Props) {
         <InstallPWA />
 
         <ClientWrapper>
-          {mode !== "development" && (
-            <div
-              style={{
-                alignItems: "center",
-                backgroundColor: "rgba(0,0,0,0.8)",
-                color: "#fff",
-                display: "flex",
-                fontSize: "32px",
-                height: "100%",
-                justifyContent: "center",
-                left: 0,
-                position: "absolute",
-                top: 0,
-                width: "100%",
-                zIndex: 9999,
-              }}
-            >
-              Coming Soon
-            </div>
-          )}
           <div className="max-w-content relative mx-auto pb-16 md:grid md:grid-cols-7 md:gap-4 md:pb-0 md:pt-14">
             <div className="col-span-2">
               <Sidebar />
