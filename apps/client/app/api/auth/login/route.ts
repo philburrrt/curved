@@ -2,7 +2,6 @@ import { User } from "lucia";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { createUser } from "@/lib/auth/createUser";
 import { validateEthereumAuth } from "@/lib/auth/ethereum";
 import { auth } from "@/lib/auth/lucia";
 import { AuthMethod, AuthSchema } from "@/lib/auth/types";

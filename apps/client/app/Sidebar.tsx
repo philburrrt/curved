@@ -66,7 +66,7 @@ export function Sidebar() {
                 icon={<BiLogIn />}
               />
               {/* // message saying sign ups are turned off until indexer is upgraded. not on mobile */}
-              <div className="hidden md:block text-sm text-gray-400 text-center">
+              <div className="hidden text-center text-sm text-gray-400 md:block">
                 Sign ups closed for upgrades
               </div>
             </>
