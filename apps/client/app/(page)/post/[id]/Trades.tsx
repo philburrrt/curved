@@ -110,8 +110,8 @@ export async function Trades({ shareId }: Props) {
                 </div>
 
                 <Link
-                  title="View on Etherscan"
-                  href={`https://etherscan.io/tx/${hash}`}
+                  title="View on Basescan"
+                  href={`https://basescan.org/tx/${hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition hover:opacity-80 active:opacity-70"
@@ -120,7 +120,7 @@ export async function Trades({ shareId }: Props) {
                     src={etherscan}
                     width={16}
                     height={16}
-                    alt="Etherscan"
+                    alt="Basescan"
                   />
                 </Link>
               </div>

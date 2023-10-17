@@ -36,11 +36,12 @@ export async function POST(request: NextRequest) {
 
     user = await auth.getUser(key.userId);
   } catch {
-    user = await createUser({
-      address: result.data.address,
-      providerId: parsedInput.data.method,
-      providerUserId: result.data.address,
-    });
+    return NextResponse.json({ error: "Cant Register" }, { status: 400 });
+    // user = await createUser({
+    //   address: result.data.address,
+    //   providerId: parsedInput.data.method,
+    //   providerUserId: result.data.address,
+    // });
   }
 
   const authRequest = auth.handleRequest({ cookies, request });
