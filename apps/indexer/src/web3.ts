@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+
 import SharesABI from "./abi/Shares.json" assert { type: "json" };
 
 if (!process.env.WS_URL) {

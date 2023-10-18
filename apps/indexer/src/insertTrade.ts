@@ -1,10 +1,10 @@
 import { trade } from "db";
 import { ethers } from "ethers";
-import { provider } from "./web3";
 
 import { db } from "./DB";
+import { provider } from "./web3";
 
-export async function insertTrade(event: ethers.Event, recursive?: Boolean) {
+export async function insertTrade(event: ethers.Event, recursive?: boolean) {
   const args = event.args;
   if (!args) {
     throw new Error("No args found in event");
@@ -33,6 +33,7 @@ export async function insertTrade(event: ethers.Event, recursive?: Boolean) {
 
   await db.insert(trade).values({
     amount,
+    createdAt,
     hash,
     owner,
     price,
@@ -40,6 +41,5 @@ export async function insertTrade(event: ethers.Event, recursive?: Boolean) {
     side,
     supply,
     trader,
-    createdAt,
   });
 }

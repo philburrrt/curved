@@ -1,12 +1,12 @@
 import { nftPost, pendingPost, post, trade } from "db";
 import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
-import { provider } from "./web3";
 
 import { db } from "./DB";
 import { nanoidLowercase } from "./nanoid";
+import { provider } from "./web3";
 
-export async function insertShare(event: ethers.Event, recursive?: Boolean) {
+export async function insertShare(event: ethers.Event, recursive?: boolean) {
   const args = event.args;
   if (!args) {
     throw new Error("No args found in event");

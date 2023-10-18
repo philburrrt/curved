@@ -1,8 +1,7 @@
-import { provider, sharesContract } from "./web3";
-
 import { indexHistoricalBlocks } from "./indexHistoricalBlocks";
 import { listenToBlocks } from "./listenToBlocks";
 import { msgDiscord } from "./msgDiscord";
+import { provider, sharesContract } from "./web3";
 
 try {
   await indexHistoricalBlocks(provider, sharesContract);
