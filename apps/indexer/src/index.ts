@@ -8,7 +8,7 @@ try {
   listenToBlocks(sharesContract);
 } catch (e) {
   console.error("Error indexing historical blocks", e);
-  msgDiscord("Error indexing historical blocks").finally(() => {
+  msgDiscord("Error indexing").finally(() => {
     process.exit(1);
   });
 }

@@ -12,7 +12,7 @@
     "dev": "sleep 5 && nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\"",
     "env": "dotenv -e ../../.env",
     "lint": "cd ../.. && eslint --fix \"apps/indexer/**/*.{ts,tsx,cjs,mjs}\" --ignore-path .gitignore",
-    "start": "pnpm build && pm2 start pnpm --name 'indexer' -- _start",
+    "start": "pnpm build && pm2 start pnpm --name 'indexer' -- _start --exp-backoff-restart-delay=100",
     "stop": "pm2 stop 'indexer'",
     "test": "nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\""
   },
