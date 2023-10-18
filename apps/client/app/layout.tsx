@@ -7,6 +7,7 @@ import { Gemunu_Libre } from "next/font/google";
 import { baseMetadata } from "./baseMetadata";
 import { InstallPWA } from "./InstallPWA";
 import { Sidebar } from "./Sidebar";
+import { env } from "@/lib/env.mjs";
 const ClientWrapper = dynamic(() => import("./ClientWrapper"));
 
 const font = Gemunu_Libre({
@@ -29,6 +30,26 @@ export default function RootLayout({ children }: Props) {
         <InstallPWA />
 
         <ClientWrapper>
+          {/* {mode !== "production" && ( */}
+          <div
+            style={{
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0)",
+              color: "#fff",
+              display: "flex",
+              fontSize: "32px",
+              height: "100%",
+              justifyContent: "center",
+              left: 0,
+              position: "absolute",
+              top: 0,
+              width: "100%",
+              zIndex: 9999,
+            }}
+          >
+            Closed
+          </div>
+          {/* )} */}
           <div className="max-w-content relative mx-auto pb-16 md:grid md:grid-cols-7 md:gap-4 md:pb-0 md:pt-14">
             <div className="col-span-2">
               <Sidebar />
