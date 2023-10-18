@@ -61,7 +61,7 @@ export async function indexHistoricalBlocks(
 
   const tradeInserts = tradeEvents.map(async (event) => {
     try {
-      await insertTrade(event);
+      await insertTrade(event, true);
     } catch (e) {
       console.log("Error inserting trade", e);
     }
@@ -69,7 +69,7 @@ export async function indexHistoricalBlocks(
 
   const shareInserts = shareEvents.map(async (event) => {
     try {
-      await insertShare(event);
+      await insertShare(event, true);
     } catch (e) {
       console.log("Error inserting share", e);
     }

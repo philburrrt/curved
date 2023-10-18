@@ -1,11 +1,12 @@
 import { nftPost, pendingPost, post, trade } from "db";
 import { eq } from "drizzle-orm";
 import { ethers } from "ethers";
+import { provider } from "./web3";
 
 import { db } from "./DB";
 import { nanoidLowercase } from "./nanoid";
 
-export async function insertShare(event: ethers.Event) {
+export async function insertShare(event: ethers.Event, recursive?: Boolean) {
   const args = event.args;
   if (!args) {
     throw new Error("No args found in event");
@@ -44,7 +45,7 @@ export async function insertShare(event: ethers.Event) {
     await tx.delete(pendingPost).where(eq(pendingPost.owner, owner));
 
     // Insert Trade
-    const tradeEntry = {
+    const tradeEntry: any = {
       amount: 1,
       hash: event.transactionHash,
       owner: owner.toLowerCase(),
@@ -54,6 +55,16 @@ export async function insertShare(event: ethers.Event) {
       supply: 1,
       trader: owner.toLowerCase(),
     };
+
+    // if historical block, need to get accurate timestamp
+    if (recursive) {
+      const block = await provider.getBlock(event.blockNumber);
+      if (block && block.timestamp) {
+        console.log("Block timestamp", block.timestamp);
+        const dateObject = new Date(block.timestamp * 1000);
+        tradeEntry.createdAt = dateObject;
+      }
+    }
 
     await tx.insert(trade).values(tradeEntry);
   });
