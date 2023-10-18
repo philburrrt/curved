@@ -8,6 +8,8 @@ import SharesABI from "./abi/Shares.json" assert { type: "json" };
 import { db } from "./DB";
 import { msgDiscord } from "./msgDiscord";
 import { nanoidLowercase } from "./nanoid";
+import { date } from "drizzle-orm/pg-core";
+import { resolve } from "path";
 const { WS_URL, SHARES_ADDRESS, DISCORD_WEBHOOK_URL } = process.env;
 
 config();
@@ -34,50 +36,12 @@ export class Indexer {
     console.log(`Indexer listening to ${SHARES_ADDRESS} on ${WS_URL}...`);
   }
 
-  indexHistoricalBlocks = async () => {
-    // last indexed block number can be found via the hash of the latest trade in the db
-    const tx = await db.select().from(trade).orderBy(desc(trade.id)).limit(1);
-    const lastTrade = tx[0];
-    console.log("Last trade", lastTrade);
-    if (!lastTrade)
-      return console.log(
-        "No trades found in db. Skipping historical indexing.",
-      );
-    console.log("Last trade hash", lastTrade.hash);
-    const receipt = await this.provider.getTransaction(lastTrade.hash);
-    console.log("Last trade block number", receipt.blockNumber);
-    if (receipt.blockNumber === undefined)
-      return console.log("No new trades found.");
-    const reInitBlockNumber = receipt.blockNumber + 1;
-
-    // get all trades since last indexed block
-    //@ts-expect-error
-    const tradeFilter = this.curve.filters.Trade();
-    //@ts-expect-error
-    const newShareFilter = this.curve.filters.ShareCreated();
-    const tradeEvents = await this.curve.queryFilter(
-      tradeFilter,
-      reInitBlockNumber,
-    );
-    const shareEvents = await this.curve.queryFilter(
-      newShareFilter,
-      reInitBlockNumber,
-    );
-    if (tradeEvents.length === 0 && shareEvents.length === 0)
-      return console.log("No new trades found.");
-    console.log("Found", tradeEvents.length, "new trades.");
-    console.log("Found", shareEvents.length, "new shares.");
-    tradeEvents.forEach((event: any) => {
-      this.handleTrade(event);
-    });
-    shareEvents.forEach((event: any) => {
-      this.handleShareCreated(event);
-    });
-  };
-
   public start() {
+    console.log("Starting indexer");
     this.curve.on("*", (event) => {
       console.log("Event", event.event);
+
+      if (event.event !== "Trade" && event.event !== "ShareCreated") return;
 
       const workerEvent = {
         address: event.address,
@@ -112,8 +76,12 @@ export class Indexer {
     });
   }
 
-  handleTrade = async (event: any) => {
-    const entry = {
+  handleTrade = async (event: any, recursive?: Boolean) => {
+    console.log("Handling trade", event);
+    if (recursive) {
+      console.log("Recursive trade, fetching block", event.blockNumber);
+    }
+    const entry: any = {
       amount: event.args[4].toNumber(),
       hash: event.transactionHash,
       owner: event.args[3].toLowerCase(),
@@ -124,11 +92,22 @@ export class Indexer {
       trader: event.args[2].toLowerCase(),
     };
 
+    if (recursive) {
+      const block = await this.provider.getBlock(event.blockNumber);
+      if (block && block.timestamp) {
+        console.log("Block timestamp", block.timestamp);
+        const dateObject = new Date(block.timestamp * 1000);
+        entry.createdAt = dateObject;
+
+        console.log("Entry", entry);
+      }
+    }
+
     console.log("Inserting trade", entry);
     await db.insert(trade).values(entry);
   };
 
-  handleShareCreated = async (event: any) => {
+  handleShareCreated = async (event: any, recursive?: Boolean) => {
     const owner = event.args[0];
     const shareId = event.args[1].toNumber();
 
@@ -168,7 +147,7 @@ export class Indexer {
 
         await tx.delete(pendingPost).where(eq(pendingPost.owner, owner));
 
-        const tradeEntry = {
+        const tradeEntry: any = {
           amount: 1,
           hash: event.transactionHash,
           owner: owner.toLowerCase(),
@@ -178,6 +157,14 @@ export class Indexer {
           supply: 1,
           trader: owner.toLowerCase(),
         };
+
+        if (recursive) {
+          const block = await this.provider.getBlock(event.blockNumber);
+          if (block && block.timestamp) {
+            const dateObject = new Date(block.timestamp * 1000);
+            tradeEntry.createdAt = dateObject;
+          }
+        }
 
         console.log("Inserting trade", tradeEntry);
         await tx.insert(trade).values(tradeEntry);
@@ -207,5 +194,50 @@ export class Indexer {
       console.error(e);
       msgDiscord(`Error creating share: ${e.message}`);
     }
+  };
+
+  indexHistoricalBlocks = async () => {
+    // last indexed block number can be found via the hash of the latest trade in the db
+    const tx = await db.select().from(trade).orderBy(desc(trade.id)).limit(1);
+    const lastTrade = tx[0];
+    if (!lastTrade)
+      return console.log(
+        "No trades found in db. Skipping historical indexing.",
+      );
+    console.log("Last trade hash", lastTrade.hash);
+    const receipt = await this.provider.getTransaction(lastTrade.hash);
+    console.log("Last trade block number", receipt.blockNumber);
+    if (receipt.blockNumber === undefined)
+      return console.log("No new trades found.");
+    const reInitBlockNumber = receipt.blockNumber + 1;
+
+    // get all trades since last indexed block
+    //@ts-expect-error
+    const tradeFilter = this.curve.filters.Trade();
+    //@ts-expect-error
+    const newShareFilter = this.curve.filters.ShareCreated();
+    const tradeEvents = await this.curve.queryFilter(
+      tradeFilter,
+      reInitBlockNumber,
+    );
+    const shareEvents = await this.curve.queryFilter(
+      newShareFilter,
+      reInitBlockNumber,
+    );
+    if (tradeEvents.length === 0 && shareEvents.length === 0)
+      return console.log("No new trades found.");
+    console.log("Found", tradeEvents.length, "new trades.");
+    console.log("Found", shareEvents.length, "new shares.");
+    // Process tradeEvents
+    tradeEvents.forEach((event: any) => {
+      this.handleTrade(event);
+    });
+    shareEvents.forEach((event: any) => {
+      this.handleShareCreated(event);
+    });
+  };
+
+  sleep = (milliseconds: number) => {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
   };
 }
