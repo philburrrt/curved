@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { db } from "./DB";
 import { insertShare } from "./insertShare";
 import { insertTrade } from "./insertTrade";
+import { msgDiscord } from "./msgDiscord";
 
 export async function indexHistoricalBlocks(
   provider: ethers.providers.WebSocketProvider,
@@ -64,6 +65,7 @@ export async function indexHistoricalBlocks(
       await insertTrade(event);
     } catch (e) {
       console.log("Error inserting trade", e);
+      msgDiscord("Error inserting trade");
     }
   });
 
@@ -72,6 +74,7 @@ export async function indexHistoricalBlocks(
       await insertShare(event);
     } catch (e) {
       console.log("Error inserting share", e);
+      msgDiscord("Error inserting share");
     }
   });
 
