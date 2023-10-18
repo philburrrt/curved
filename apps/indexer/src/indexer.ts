@@ -22,21 +22,9 @@ export class Indexer {
     this.userWorker = new Worker(
       new URL("./workers/user_accounting.js", import.meta.url),
     );
-    this.userWorker.on("exit", (code) => {
-      console.log(`User worker stopped with exit code ${code}... Restarting`);
-      this.userWorker = new Worker(
-        new URL("./workers/user_accounting.js", import.meta.url),
-      );
-    });
     this.shareWorker = new Worker(
       new URL("./workers/share_accounting.js", import.meta.url),
     );
-    this.shareWorker.on("exit", (code) => {
-      console.log(`Share worker stopped with exit code ${code}... Restarting`);
-      this.shareWorker = new Worker(
-        new URL("./workers/share_accounting.js", import.meta.url),
-      );
-    });
     this.provider = new ethers.providers.WebSocketProvider(WS_URL ?? "");
     this.curve = new ethers.Contract(
       SHARES_ADDRESS ?? "",

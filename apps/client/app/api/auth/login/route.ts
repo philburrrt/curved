@@ -1,7 +1,7 @@
 import { User } from "lucia";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
+import { createUser } from "@/lib/auth/createUser";
 import { validateEthereumAuth } from "@/lib/auth/ethereum";
 import { auth } from "@/lib/auth/lucia";
 import { AuthMethod, AuthSchema } from "@/lib/auth/types";
@@ -35,12 +35,11 @@ export async function POST(request: NextRequest) {
 
     user = await auth.getUser(key.userId);
   } catch {
-    return NextResponse.json({ error: "Cant Register" }, { status: 400 });
-    // user = await createUser({
-    //   address: result.data.address,
-    //   providerId: parsedInput.data.method,
-    //   providerUserId: result.data.address,
-    // });
+    user = await createUser({
+      address: result.data.address,
+      providerId: parsedInput.data.method,
+      providerUserId: result.data.address,
+    });
   }
 
   const authRequest = auth.handleRequest({ cookies, request });
